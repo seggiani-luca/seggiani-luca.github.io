@@ -1,6 +1,6 @@
 body {
 	font-size: 16px;
-	font-family: Helvetica, sans-serif;
+	font-family: Helvetica, Arial, sans-serif;
 	background: url("../pics/grid.png") repeat;
 	background-size: 40px;
 	background-attachment: fixed;
@@ -46,6 +46,10 @@ h1, h2, h3 {
 
 h2 {
 	margin-top: 20px;
+}
+
+h3 {
+	margin-top: 10px;
 }
 
 p {
