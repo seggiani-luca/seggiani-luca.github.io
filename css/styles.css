@@ -1,6 +1,4 @@
 body {
-	margin: 40px auto;
-	max-width: 576px;
 	font-size: 16px;
 	font-family: Helvetica, sans-serif;
 	background: url("../pics/grid.png") repeat;
@@ -33,6 +31,8 @@ header div {
 }
 
 .bg {
+	max-width: 576px;
+	margin: 0 auto;
 	padding: 20px;
 	border: 2px solid black;
 	background-color: white;
@@ -55,11 +55,7 @@ p {
 }
 
 @media (max-width: 576px) {
-	header {
-		height: 100px;
+	.bg {
+		width: 90%;
 	}
-
-	body {
-    font-size: 18px;
-  }
 }
