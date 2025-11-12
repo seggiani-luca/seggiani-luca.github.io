@@ -10,13 +10,20 @@
 	<body>
 		<div class="bg">
 			<header>
-				<h1>
-					Luca Seggiani
-				</h1>
-				<hr/>
-				<p>
-					Studente di Ingegneria Informatica @ Università di Pisa
-				</p>
+				<img id="headshot" src=""/>
+				<script>
+					const num = Math.floor(Math.random() * 11) + 1;
+					document.getElementById('headshot').src = `pics/headshot ${num}.jpeg`;
+				</script>
+				<div>
+					<h1>
+						Luca Seggiani
+					</h1>
+					<hr/>
+					<p>
+						Studente di Ingegneria Informatica @ Università di Pisa
+					</p>
+				</div>
 			</header>
 			<h2>
 				Progetti
@@ -217,7 +224,7 @@
 					<p>
 					Ho della musica su <a href="https://xeno7.bandcamp.com">Bandcamp</a> e su <a href="https://www.youtube.com/@darkside6973">YouTube</a>. 
 					
-					Inoltre, suono tromba e tastiere nella <a href="https://filarmonicavannuzzi.it/bandalarga.html">Banda Larga</a> di Roccalbegna.
+					Inoltre, suono tromba e tastiere nella <a href="https://filarmonicavannuzzi.it/bandalarga.html">Banda Larga</a> di Roccalbegna
 					</p>
 				</li>
 			</ul>
