@@ -4,7 +4,7 @@ body {
 	background: url("../pics/grid.png") repeat;
 	background-size: 40px;
 	background-attachment: fixed;
-  animation: scroll-bg 120s linear infinite;
+  	animation: scroll-bg 120s linear infinite;
 }
 
 @keyframes scroll-bg {
