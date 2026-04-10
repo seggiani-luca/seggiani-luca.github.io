@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="it">
+	<head>
+		<meta charset="utf-8">
+		<title>city-report</title>
+		<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/
+			loader/run_prettify.js"></script>
+		<link rel="stylesheet" href="../../css/styles.css">
+		<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	</head>
+	<body>
+		<div class="bg">
+			<h1>
+				Città procedurali in <a href="https://www.unity.com">Unity</a>
+			</h1>
+			<hr/>
+			<p>
+			Di recente sono stato interessato a realizzare un sistema per la 
+			generazione di ambienti urbani procedurali usando 
+			<a href="https://www.unity.com">Unity</a> come motore grafico. 
+			Questo progetto è stato perlopiù una scusa per approfondire ed 
+			implementare una versione dell'algoritmo 
+			<a href="https://github.com/mxgmn/WaveFunctionCollapse">WFC 
+			(Wave Function Collapse)</a> per la popolazione di griglie di 
+			caselle modulari, basata su regole di adiacenza. 
+			La scelta della piattaforma da usare è caduta proprio su Unity in 
+			quanto fornisce diverse funzionalità avanzate (sopratutto per 
+			quanto riguarda la gestione delle gerarchie di oggetti, il sistema 
+			di prefab modulari e delle shader), restando abbastanza semplice e 
+			facile da estendere attraverso il sistema di scripting in 
+			<a href="https://dotnet.microsoft.com/en-us/languages/csharp">C#
+			</a>.
+			</p>
+			<figure>
+				<img alt="sunset" src="pics/sunset_19_30.png"/>
+				<figcaption>Autostrada alle 7:30 PM</figcaption>
+			</figure>
+			<p>
+			I risultati non mirano al realismo, ma offrono una prospettiva 
+			interessante sulle proprietà emergenti del sistema generativo, 
+			nonché un'implementazione particolare dell'algoritmo WFC su griglie
+			multilivello.
+			</p>
+
+			<h2>Algoritmo WFC</h2>
+			<p>
+			L'algoritmo WFC (descritto per la prima volta 
+			<a href="https://github.com/mxgmn/WaveFunctionCollapse">qui</a>)
+			popola una griglia NxN in maniera procedurale usando un processo 
+			ispirato dal 
+      <a href="https://it.wikipedia.org/wiki/Collasso_della_funzione_d%27onda">
+			collasso della funzione d'onda</a> in meccanica quantistica.
+			Si assume la griglia come composta da <i>caselle</i>, e si 
+			determina una serie di <i>regole di adiacenza</i> che specificano
+			quali caselle possono essere disposte di fianco ad altre.
+			</p>
+			<p>
+			Vediamo innanzitutto come queste regole di adiacenza vengono 
+			definite nel codice. Per ogni casella si avrà:
+<pre class="prettyprint">
+class Tile {
+	// number of layers this tile defines adjacency rules for
+	[Min(1)]
+	public int layers = 1;
+
+	// flag enum for adjacency directions
+	[Flags]
+	public enum Adjacency
+	{
+		None = 0,
+		North = 1 << 0,
+		East = 1 << 1,
+		South = 1 << 2,
+		West = 1 << 3
+	}
+		
+	// array of adjaciencies for each layer
+	public Adjacency[] adjacencies;
+
+	// ...
+}
+</pre>
+			cioè un numero di livelli su cui si definiscono adiacenze, e un
+			array di tipi <code>flag enum</code> che indicano verso quali direzioni 
+			cardinali le adiacenze sono concesse, ad ogni livello.
+			</p>
+			<p>
+			Lo svolgimento dell'algoritmo, quindi, è sintetizzato grossomodo 
+			nei seguenti
+			passaggi:
+			<ol>
+				<li>
+					Si inizializza una griglia NxN di caselle. Ad ogni casella 
+					si associa un insieme di stati possibili, e una funzione 
+					del numero di stati che rappresenta l'<i>entropia</i> di 
+					tale casella. L'entropia dovrà essere monotona crescente 
+					col numero di stati possibili. Nel codice la implementiamo
+					come segue:
+<pre class="prettyprint">
+// entropy of the tile set
+public float getEntropy()
+{
+	// entropy depedends on number of valid instances
+	int num = instances.Count;
+
+	if (num <= 1)
+	{
+		// if only one instance, tile set is collapsed
+	 	// and entropy is infinite
+		return float.PositiveInfinity;
+	}
+	else
+	{
+		return num;
+	}
+}
+</pre>
+					dove notiamo il valore infinito fa da "sentinella" per le 
+					caselle già collassate (con un solo numero o meno di stati
+					validi possibili);
+				</li>
+				<li>
+					Si sceglie una casella a caso e si <i>collassa</i>, cioè si
+					sceglie uno a caso fra gli stati possibili e si seleziona 
+					come l'unico valido per tale casella. Quindi, questo 
+					collassamento viene propagato alle caselle vicine, 
+					eliminando in queste gli stati che non sono più validi a 
+					seguito del collassamento.
+					Il codice di collassamento di una casella si presenta come
+					segue:
+<pre class="prettyprint">
+// collapse one tile at a certain coordinate
+private void collapseTile(int r, int c)
+{
+	// get tile set at coordinate
+	TileSet set = grid[r, c];
+
+	// collapse tile set
+	set.collapse(rng);
+
+	// get adjacency
+	Tile.Adjacency[] adjacencies = set.getAdjacencies();
+
+	// use adjacency to mask neighboring tiles
+	if (r < rows - 1)
+	{
+		grid[r + 1, c].restrict(adjacencies, 
+	 		Tile.Adjacency.North);
+	}
+	if (c < cols - 1)
+	{
+		grid[r, c + 1].restrict(adjacencies, 
+	 		Tile.Adjacency.East);
+	}
+	if (r > 0)
+	{
+		grid[r - 1, c].restrict(adjacencies, 
+			Tile.Adjacency.South);
+	}
+	if (c > 0)
+	{
+		grid[r, c - 1].restrict(adjacencies, 
+			Tile.Adjacency.West);
+	}
+}
+</pre>
+				dove notiamo la propagazione si fa ad un solo livello (vicini
+				immediati) della casella collassata;
+				</li>
+				<li>
+					Da qui in poi per ogni casella rimanente si sceglie una per 
+					volta quella ad entropia minore, e la si collassa;
+				</li>
+				<li>
+					Dopo NxN passaggi (incluso quello casuale iniziale) si ha
+					una griglia totalmente popolata e coerente alle regole 
+					imposte, che può essere a questo punto disegnata a schermo.
+				</li>
+			</ol>
+			</p>
+			<p>
+			In codice, questo si traduce in una routine di generazione del 
+			tipo:
+<pre class="prettyprint">
+void generate() {
+	// initialize grid
+	initGrid();
+
+	// get random tile
+	int firstR = rng.Next(rows);
+	int firstC = rng.Next(cols);
+
+	// collapse first tile
+	collapseTile(firstR, firstC);
+
+	// update tiles
+	for (int i = 1; i < rows * cols; i++)
+	{
+		// get lowest entropy tile
+		int r, c;
+		getLowestEntropy(out r, out c);
+
+		// collapse tile
+		collapseTile(r, c);
+	}
+
+	// realize
+	realizeInstances(true);
+}
+</pre>
+			</p>
+			<p>
+			In figura si vede come questo processo viene a svolgersi nel tempo,
+			su una griglia 8x8:
+			</p>
+			<figure>
+				<img alt="generation" src="pics/generation_13_30.gif"/>
+				<figcaption>Generazione di una griglia 8x8</figcaption>
+			</figure>
+			<p>
+			Dalla figura si vede come l'algoritmo WFC va a comporre la base 
+			della città (cioè la griglia stradale), al di sopra della quale 
+			vengono disposti dettagli aggiuntivi come edifici, lampioni, ecc...
+			</p>
+
+			<h2>Caselle</h2>
+			<p>
+			Di base una casella è un modulo che rappresenta una certa 
+			caratteristica della griglia stradale (una strada dritta, una 
+			curva, ecc...) lasciando spazio per dettagli aggiuntivi come 
+			palazzi, ecc...
+			</p>
+			<p>
+			Le dimensioni adottate sono mostrate in figura:
+			</p>
+			<figure>
+				<img alt="tile dimensions" src="pics/tile_dimensions.png"/>
+				<figcaption>Dimensioni di una casella</figcaption>
+			</figure>
+			<p>
+			dove in particolare abbiamo una dimensione di casella di 64x64 
+			metri, una larghezza della carreggiata di 6 metri, ed uno spazio di
+			29x29 metri fra le strade (che può ospitare edifici o altri 
+			dettagli).
+			</p>
+			<p>
+			Dopo alcuni esperimenti con implementazioni semplici della WFC sono
+			rimasto deluso dalla poca varietà delle griglie stradali che si 
+			ottenevano. Quest'implementazione è stata quindi pensata per 
+			supportare griglie che si sviluppavano non solo planarmente, ma 
+			anche verticalmente su un numero arbitrario di livelli. Questo 
+			permette ad esempio di generare griglie più complesse che 
+			comprendono:
+			<ol>
+				<li>Un livello base, con autostrade interrate o sistemi di 
+					canali;</li>
+				<li>Un livello stradale intermedio con incroci a raso e 
+					passaggi pedonali;</li>
+				<li>Un livello superiore di autostrade, ferrovie, ecc...</li>
+			</ol>
+			Chiaramente il carico di caselle che vanno modellate si moltiplica,
+			e bisogna tenere a mente che caselle diverse possono avere 
+			adiacenze su più livelli. 
+			</p>
+			<p>
+			Per diminuire il numero di modelli da realizzare si è deciso di 
+			spostare la complessità nel codice, e permettere a più caselle di
+			sovrapporsi su diversi livelli. Questo permette, ad esempio, di
+			modellare un sovrappasso autostradale e sovrapporlo ad un canale 
+			come ad una strada a livello pedonale.
+			</p>
+			<p>
+			I modelli che sono stati realizzati per le caselle sono quindi i 
+			seguenti:
+			</p>
+			<figure>
+				<img alt="tiles" src="pics/tiles.png"/>
+				<figcaption>Insieme di caselle modellate</figcaption>
+			</figure>
+			<p>
+			che dal basso verso l'alto corrispondono con i livelli 
+			esemplificati prima: un primo livello di canali, un piano stradale
+			intermedio formato da strade con incroci a raso, ed un livello
+			superiore di autostrade.
+			Sono state modellate anche alcune caselle particolari che uniscono
+			più livelli, come un ponte su un canale o una rampa di accesso
+			al livello autostradale.
+			</p>
+			<p>
+			Gran parte della complessità del progetto sta negli <i>script</i>
+			C# che sono stati realizzati. In particolare, si è voluto 
+			realizzare un sistema che fosse facile ed efficiente per la 
+			definizione delle caselle, e che allo stesso tempo restituisse una
+			rappresentazione delle stesse abbastanza efficiente per 
+			l'esecuzione dell'algoritmo WFC.
+			</p>
+			<p>
+			Si ha quindi una distinzione fra due definizioni delle caselle (e
+			quindi due gerarchie di classi), in base al dominio considerato:
+			<ul>
+				<li>
+					All'utente interessa poter definire velocemente singole 
+					caselle, le relative regole di adiacenza su ogni livello,
+					e sopratutto il modo in cui queste caselle possono essere
+					sovrapposte sui livelli verticali. Per questo si definisce:
+					<ul>
+						<li>
+						La classe <code>Tile</code>, che rappresenta lo stato
+						di una casella ad un singolo livello, con il suo 
+						modello e le sue adiacenze. Il sistema degli 
+						<code>ScriptableObject</code> di Unity permette di 
+						rendere questa classe facilmente modificabile da 
+						interfaccia grafica. Vediamo ad esempio il tile che 
+						rappresenta una rampa autostradale:
+						<figure>
+							<img alt="on ramp inspector" 
+							src="pics/on_ramp_inspect.png"/>
+							<figcaption>Inspector di un tile</figcaption>
+						</figure>
+						</li>
+						<li>
+						La classe <code>TileStack</code>, che rappresenta una
+						serie di liste (<code>TileList</code>) contenente gli 
+						stati validi per ogni livello di un certo tipo di 
+						casella. Anche questa classe ha una comoda interfaccia
+						grafica, vediamo ad esempio lo stack che rappresenta le
+						caselle stradali semplici:
+						<figure>
+							<img alt="road stack inspector" 
+							src="pics/road_stack_inspect.png"/>
+							<figcaption>Inspector di uno stack</figcaption>
+						</figure>
+						</li>
+					</ul>
+				</li>
+				<li>
+					All'algoritmo WFC interessa avere una rappresentazione 
+					efficiente di tutti gli stati possibili per ogni casella.
+					Per questo si è ritenuto necessario perdere l'astrazione 
+					delle <code>TileList</code> e collassare gli stati 
+					possibili ad una lista unificata, rappresentata come un 
+					insieme hash. Questo è utile in quanto semplifica di molto 
+					la logica che verifica se le regole di adiacenza sono 
+					rispettate (non si devono considerare ogni volta tutti i 
+					casi in quanto sono precalcolati).
+					<ul>
+						<li>
+						Una singola istanza realizzata di casella viene 
+						rappresentata da una classe <code>TileInstance</code>.
+						Questa unifica un singolo stato completo di una casella
+						(collassato lo stato ad ogni livello);
+						</li>
+						<li>
+						L'insieme completo di istanze su cui l'algoritmo WFC
+						esegue viene detto <code>TileSet</code>, che contiene
+						l'insieme hash vero e proprio.
+						</li>
+					</ul>
+				</li>
+			</ul>
+			</p>
+			<p>
+			Questa configurazione permette quindi sia un semplice 
+			<i>authoring</i> delle caselle che una semplice implementazione 
+			dell'algoritmo WFC. 
+			Come abbiamo visto, l'authoring si fa via interfaccia grafica.
+			</p>
+			<p>
+			Quindi, la trasformazione dei <code>TileStack</code> in 
+			<code>TileSet</code> si fa in maniera ricorsiva con backtracking 
+			considerando tutte le possibili combinazioni di stati ad ogni 
+			livello. Per questo è predisposta una funzione:
+<pre class="prettyprint">
+// performs a recursive step to get the combinations from a tile stack
+private static void populateTileSet(
+	TileStack.TileList[] lists,           // tile lists
+	int depth,                            // depth of the current step
+	List&lt;TileInstance.Component&gt; current, // current component list 
+	TileSet result)                       // result set 
+{
+	// did you reach the end?
+	if (depth == lists.Length)
+	{
+		// end reached, append this instance 
+		TileInstance instance 
+			= new TileInstance(result.layers, current);
+		result.instances.Add(instance);
+		return;
+	}
+
+	// get the next tile list
+	Tile[] tiles = lists[depth].tiles;
+
+	// go through each tile in the list
+	foreach (Tile tile in tiles)
+	{
+		// generate the tile component from this tile
+		TileInstance.Component component 
+			= new TileInstance.Component(tile, orientation);
+
+		// add it to the current set
+		current.Add(component);
+
+		// go to the next step
+		populateTileSet(lists, depth + 1, current, result);
+
+		// remove tile component from the current set
+		current.RemoveAt(current.Count - 1); // backtrack
+	}
+}
+</pre>
+			</p>
+			<p>
+			A questo punto la logica dell'algoritmo WFC è semplice. Ad esempio,
+			per restringere una <code>TileSet</code> ai soli stati concessi da
+			un adiacenza in una data direzione, basta controllare tutti i casi
+			precalcolati:
+<pre class="prettyprint">
+// collapse tile set to tiles that satisfy given adjacency in direction
+public bool restrict(
+	Tile.Adjacency[] baseAdjacencies, // requested adjacency 
+	Tile.Adjacency direction)         // in which direction
+{
+	// get opposite direction 
+	Tile.Adjacency opposite = Tile.oppositeAdjacency(direction);
+
+	// check all candidate tile instances
+	int removed = instances.RemoveWhere(tileInstance =>
+	{
+		// get the adjacencies of the candidate
+		Tile.Adjacency[] candidate = tileInstance.getAdjacencies();
+
+		// check on each layer
+		for (int i = 0; i < layers; i++)
+		{
+			// base tile has adjacency in this direction?
+			bool baseHasEdge
+	 			= (baseAdjacencies[i] & direction) != 0;
+
+			// candidate has adjacency in this direction?
+			bool candidateHasEdge 
+	 			= (candidate[i] & opposite) != 0;
+
+			// if adjacencies don't match remove candidate
+			if (baseHasEdge != candidateHasEdge) return true;
+		}
+
+		return false;
+	});
+
+	// return if something was removed
+	return removed > 0;
+}
+</pre>
+			</p>
+			
+			<h2>Edifici</h2>
+			<p>
+			Per riempire gli spazi liberi delle caselle sono stati modellati 
+			alcuni edifici. Questi sono stati divisi, per ispirazione da 
+			videogiochi come <a href="https://www.ea.com/it-it/games/simcity">
+			SimCity</a>, in categorie, fra cui:
+			<ul>
+				<li>Edifici residenziali;</li>
+				<li>Edifici commerciali;</li>
+				<li>Edifici industriali.</li>
+			</ul>
+			L'idea dietro questa suddivisione è quella di poter, in fase di 
+			generazione, individuare diverse regioni della città a 
+			concentrazioni diverse di edifici di un certo tipo, come zone 
+			industriali, residenziali, commerciali, ecc...
+			</p>
+			<p>
+			I modelli che sono stati realizzati per gli edifici sono quindi i 
+			seguenti:
+			</p>
+			<figure>
+				<img alt="buildings" src="pics/buildings.png"/>
+				<figcaption>Insieme di edifici modellati</figcaption>
+			</figure>
+			<p>
+			Oltre a questi modelli, sono stati poi realizzati altri dettagli 
+			minori (da sovrapporre sulle caselle popolate da edifici), come ad
+			esempio lampioni, vegetazione, ecc...
+			Questi vengono sempre distribuiti in maniera proceduale in zone 
+			appropiate (lampioni a bordo strada, vegetazione nei parchi, 
+			ecc...).
+			</p>
+			<p>
+			Anche per gli edifici si sono fatte delle considerazioni riguardo
+			alla modalità della generazione. Ad esempio, per realizzare la
+			divisione fra diverse regioni si è usato un approccio basato sul 
+			<a href="https://en.wikipedia.org/wiki/Perlin_noise">rumore di 
+			Perlin</a>. 
+			Sostanzialmente, per ogni casella viene calcolato un rumore casuale
+			campionato dal rumore di Perlin (che è spazialmente corente e porta
+			a regioni distinte). Questo va ad indicizzare una delle regioni 
+			possibili (e quindi di tipologie di edificio possibili). In codice:
+<pre class="prettyprint">
+// sample perlin noise
+float noise = Mathf.PerlinNoise(
+	origin.position.x * zoneFrequency + i * zoneFrequency + noiseOffset,
+	origin.position.z * zoneFrequency + i * zoneFrequency + noiseOffset
+);
+noise = Mathf.SmoothStep(0f, 1f, noise);
+
+// make selection
+int selection = (int)(noise * factors.list[i].options.Length);
+</pre>
+			</p>
+			<p>
+			Un esempio dell'esecuzione di questo algoritmo si ha visualizzando
+			come vengono disposte le zone. Indichiamo in verde le zone 
+			residenziali, in blu le zone commerciali, ed in giallo le zone
+			industriali:
+			</p>
+			<figure>
+				<img alt="zoning" src="pics/zoning.png"/>
+				<figcaption>Suddivisione in zone</figcaption>
+			</figure>
+			
+			<h2>Conclusioni</h2>
+			<p>
+			Il sistema così realizzato permette di definire velocemente insiemi
+			di stati di caselle a partire da asset generati a mano, modificare
+			le regole di adiacenza e ricavare un gran numero di varietà di
+			ambienti urbani.
+			</p>
+			<figure>
+				<img alt="overhead" src="pics/overhead_13_30.png"/>
+				<figcaption>Vista dall'alto, 8x8</figcaption>
+			</figure>
+			<p>
+			Ci sono molti elementi del progetto che non sono stati visti in 
+			questo writeup. Ad esempio:
+			<ul>
+				<li>Sono state scritte shader apposite che permettono di 
+				visualizzare sui modelli effetti di ombra precalcolati da 
+				software esterni;</li>
+				<li>Diverse caratteristiche della città generate sono 
+				ulteriormente randomizzate dopo la generazione, come l'altezza
+				dei palazzi, la distribuzione della vegetazione e altri 
+				dettagli;</li>
+				<li>Sono stati realizzati diversi effetti grafici, ad esempio
+				atmosferici (nuvole, ciclo del giorno e della notte) o a 
+				livello stradale (accensione dei lampioni a ore prefissate del
+				giorno, ecc...);</li>
+				<li>La gestione degli edifici non è limitata al singolo fattore
+				tipologia, ma può essere estesa a più fattori attraverso un 
+				meccanismo di selezione multidimensionale (si pensava di 
+				implementare un ulteriore fattore densità che caratterizzasse
+				le zone ulteriormente). Si rende disponibile anche un'
+				integrazione nell'interfaccia grafica per tale meccanismo.</li>
+			</ul>
+			</p>
+			<p>
+			Il sistema presenta anche limitazioni. Ad esempio, la propagazione
+			ad un solo livello delle caselle porta a volte al raggiungimento di
+			stati inconsistenti, sopratutto su griglie di grandi dimensioni.
+			Questo si traduce in un "buchi" nella griglia che non hanno una 
+			casella valida.
+			Si potrebbe pensare di risolvere il problema aggiungendo un sistema
+			di propagazione ricorsiva delle variazioni nella griglia (che però
+			diventa molto velocemente pesante e inefficiente), oppure 
+			introducendo una serie di caselle "wildcard" che possono riempire i
+			buchi con un adiacenza ad ogni livello.
+			In ogni caso, modificando l'insieme di caselle fornite al sistema,
+			si può migliorare la qualità delle griglie ottenute (ad esempio
+			fornendo una maggiore varietà di caselle con diverse adiacenze).
+			</p>
+			<p>
+			Per chi volesse approfondire, c'è una
+ 			<a href="https://github.com/seggiani-luca/city-unity">repo</a> con 
+			tutto il sorgente e gli asset usati, più una scena di esempio 
+			(quella usata finora come esempio).
+			</p>
+			<figure>
+				<img alt="night" src="pics/night_06_00.png"/>
+				<figcaption>Cielo di notte alle 6:00 AM</figcaption>
+			</figure>
+		</div>
+	</body>
+</html>

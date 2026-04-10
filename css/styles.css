@@ -12,6 +12,16 @@ body {
 	to { background-position: -100% -100%; }
 }
 
+.bg {
+	max-width: 576px;
+	margin: 0 auto;
+	margin-bottom: 20px;
+	padding: 20px;
+	border: 2px solid black;
+	background-color: white;
+	box-shadow: rgba(0, 0, 0, 0.3) 15px 15px;
+}
+
 header {
 	height: 90px;
 	display: flex;
@@ -21,23 +31,13 @@ header {
 	gap: 20px;
 }
 
-header img {
-	height: 100%;
-	border: 2px solid black;
-}
-
 header div {
 	width: 100%;
 }
 
-.bg {
-	max-width: 576px;
-	margin: 0 auto;
-	margin-bottom: 20px;
-	padding: 20px;
-	border: 2px solid black;
-	background-color: white;
-	box-shadow: rgba(0, 0, 0, 0.3) 15px 15px;
+#headshot {
+	height: 100%;
+	width: auto;
 }
 
 h1, h2, h3 {
@@ -57,6 +57,19 @@ p {
 	text-align: justify;
 	padding: 0;
 	margin: 5px 0;
+}
+
+.bg img {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 100%;
+	border: solid 1px black;
+	box-shadow: rgba(0, 0, 0, 0.3) 5px 5px;
+}
+
+pre.prettyprint {
+	font-size: 12px;
+	padding: 10px;
 }
 
 @media (max-width: 420px) {
