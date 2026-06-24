@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<nav>
+<ul>
+<li><a href=/index.html>Index</a></li>
+<li><a href=/altro.html>Altro</a></li>
+<li><a href=/appunti.html>Appunti</a></li>
+<li><a href=/progetti.html>Progetti</a></li>
+</ul>
+</nav>
+<main>
+<h1>Logic Sim</h1>
+<p>Un editor di circuiti e simulatore logico scritto in JavaScript.</p>
+<p>Sono disponibili una <a href="https://seggiani-luca.github.io/logic-sim/">versione statica</a> da provare nel browser, e la <a href="https://github.com/seggiani-luca/logic-sim">repository</a>.</p>
+<p><img src="/pics/logic-sim/screenshot.png" alt="un adder a 4 cifre" /></p>
+<p>Un adder a 4 bit che mostra 6 + 4 = 10</p>
+<h2>Uso dell'editor</h2>
+<p>Dal menu dei componenti si può trascinare (cliccando, non trascinando), per inserire nello spazio di lavoro di destra. Sono disponibili i seguenti tipi di componenti:</p>
+<ul>
+<li>Ingresso/uscita
+<ul>
+<li>Porte di ingresso</li>
+<li>Porte di uscita</li>
+</ul>
+</li>
+<li>Porte logiche
+<ul>
+<li>Porte NOT</li>
+<li>Porte AND</li>
+<li>Porte NAND</li>
+<li>Porte OR</li>
+<li>Porte NOR</li>
+<li>Porte XOR</li>
+<li>Porte XNOR</li>
+</ul>
+</li>
+<li>Miscellanee
+<ul>
+<li>Nodi di testo</li>
+</ul>
+</li>
+</ul>
+<p>Cliccando di nuovo su un componente creato viene visualizzato un pulsante per la rimozione dello stesso.</p>
+<p>Cliccando sul pin di uscita di un componente si può creare una connessione col pin di ingressso di un altro componente, mentre cliccando di nuovo sul pin di ingresso si può eliminare una connessione già esistente. Eliminare un componente significa eliminare tutte le sue connessioni.</p>
+<p>Cliccando sul LED di una porta di ingresso si può aggiornare il suo valore logico. Le variazioni delle variabili logiche si propagano automaticamente attraverso il circuito fino alle porte di uscita, e vengono visualizzate lungo le connessioni fra componenti, sulla base dei colori:</p>
+<ul>
+<li>Rosso: segnale <em>basso</em>;</li>
+<li>Verde: segnale <em>alto</em>;</li>
+<li>Grigio: segnale in <em>alta impedenza</em>.</li>
+</ul>
+<p>I circuiti si possono salvare e caricare da locare, in formato <code>.json</code>, usando i pulsanti <strong>Save</strong> e <strong>Load</strong>. Sono disponibili una serie di circuiti di esempio in logica combinatoria e sequenziale.</p>
+</main>
+</body>

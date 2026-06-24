@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<nav>
+<ul>
+<li><a href=/index.html>Index</a></li>
+<li><a href=/altro.html>Altro</a></li>
+<li><a href=/appunti.html>Appunti</a></li>
+<li><a href=/progetti.html>Progetti</a></li>
+</ul>
+</nav>
+<main>
+<h1>Micro Sim</h1>
+<p>Un emulatore per un sistema basato su <a href="https://github.com/seggiani-luca/micro-sim/blob/main/riscv.org">RISC-V</a>.</p>
+<p><img src="/pics/micro-sim/filesystem_term.png" alt="hello-world" /></p>
+<p>Visualizzazione di un file system</p>
+<h2>Introduzione</h2>
+<p>L'emulatore simula un sistema con processore ad architettura RISC-V a 32 bit, in particolare basato sull'ISA <em>RV32I</em>. Il codice sorgente è scritto in <em>Java</em>.
+Sono disponibili il sorgente dell'emulatore e una piccola libreria per lo sviluppo del firmware di sistema nella <a href="https://github.com/seggiani-luca/micro-sim">repository</a>.</p>
+<p>Le componenti simulate sono:</p>
+<ul>
+<li>Processore che implementa l'ISA RV32I;</li>
+<li>Spazio di memoria a 32 bit, composto da EPROM in sola lettura, RAM e VRAM;</li>
+<li>Supporto per interfacce simulate, e.g. video, tastiera, ecc...</li>
+</ul>
+<p>Il firmware (caricato nelle EPROM simulate) dei sistemi emulati deve essere compilato o assemblato per architettura RISC-V, ISA RV32I. Per compilare il proprio firmware viene resa disponibile una libreria scritta in C++, e file di configurazione per la toolchain <a href="https://github.com/riscv-collab/riscv-gnu-toolchain">riscv-gnu-toolchain</a> (basata sulla comune toolchain GNU).</p>
+<p>Si possono eseguire più istanze concorrenti del sistema, dove ognuna viene simulata nel dettaglio dei suoi componenti (processore, memoria, ecc...). La configurazione del sistema (cioè la disposizione delle regioni di memoria e dei dispositivi) è fissa.</p>
+<p>Le componenti gestite dall'emulatore per ogni istanza del sistema simulato sono:</p>
+<ul>
+<li>
+<p>Un processore che implementa l'ISA RV32I. Questa prevede le istruzioni minime definite da RISC-V, ovvero operazioni aritmetiche, accesso alla memoria, esecuzione condizionale e chiamate di sistema tramite le primitive <code>EBREAK</code> ed <code>ECALL</code>. Il processore viene modellizzato con un approccio a coda di micro-operazioni, dove la macchina a stati viene ridotta ad un esecutore sequenziale;</p>
+</li>
+<li>
+<p>Spazio di memoria a 32 bit, composto da EPROM in sola lettura, RAM e VRAM in sola scrittura. Il firmware fornito all'emulatore in formato ELF viene caricato nella memoria EPROM dei sistemi simulati, prima dell'avvio della simulazione;</p>
+</li>
+<li>
+<p>Supporto per dispositivi di I/O mappati in memoria, e.g. video, tastiera, ecc... Questi possono essere completamente <em>sincroni</em> al bus locale del processore (come ad esempio la <em>tastiera</em>), o operare in maniera <em>asincrona</em> su thread separati rispetto a quello del processore, in modo da simulare interazioni concorrenti (come ad esempio il <em>timer</em>).</p>
+<p>I dispositivi disponibili sul sistema sono:</p>
+<ul>
+<li>Dispositivo <em>tastiera</em> <em>PS/2</em>, con supporto parziale allo scan set 1 dell'IBM PC AT. A questo vengono indirizzati i caratteri digitati sulla finestra grafica dell'emulatore;</li>
+<li>Dispositivo <em>video</em> in modalità testo, 80 per 30 caratteri, con supporto alla <em>Code Page 437</em>. Il framebuffer renderizzato da questo viene disegnato sulla finestra grafica;</li>
+<li>Dispositivo <em>timer</em> a 3 canali programmabile dal processore, ispirato dal <em>PIT</em> dell'IBM PC AT;</li>
+<li>Dispositivo di <em>rete</em> per la trasmissione seriale ispirata da <em>RS-232</em>. Permette di simulare la comunicazione fra più istanze disposte secondo una topologia <em>a stella</em> basata su un hub centrale.</li>
+</ul>
+</li>
+</ul>
+<p>L'emulatore è pensato per essere <em>interattivo</em>: lo stato delle simulazioni viene visualizzato attraverso delle <em>interfacce utente</em>, ovvero una finestra grafica per simulazione, ed una shell di debug condivisa. Si può interagire con la finestra grafica (e quindi con il sistema simulato) come con una qualsiasi riga di comando, e osservare il comportamento ad un maggiore livello di dettaglio dalla shell di debug.</p>
+<h2>Uso dell'emulatore</h2>
+<p>Si interagisce con l'emulatore attraverso la riga di comando, fornendo come argomenti i parametri da usare per configurare l'emulatore stesso ed inizializzare e le simulazioni.</p>
+<p><img src="/pics/micro-sim/hello_world_win.png" alt="hello-world" /></p>
+<p>Schermata di Hello, World!</p>
+<p>Gli argomenti supportati sono:</p>
+<ul>
+<li><code>-e</code>: indica il percorso della directory delle EPROM. All'avvio, l'emulatore scansiona questa directory per file ELF, e per ciascuno istanzia una simulazione, caricandone i contenuti nell'EPROM del sistema simulato. Questo permette di lanciare più simulazioni concorrenti, ognuna con la propria immagine dell'EPROM all'avvio. Di default, questo percorso è configurato come <code>emulator/data/eprom</code>;</li>
+<li><code>-d</code>: indica se abilitare la shell di debug all'avvio dell'emulatore. Questa fornisce alcune funzionalità di debugging durante l'esecuzione, fra cui la possibilità di fare <code>step</code> a livello di micro-operazioni, analizzare e modificare il contenuto della memoria a tempo di esecuzione, ed arrestare/ripristinare i thread di esecuzione.
+Se non si fornisce l'argomento <code>-d</code>, il firmware del sistema simulato può comunque lanciare la shell di debug in qualsiasi momento eseguendo l'istruzione <code>EBREAK</code> (che viene interpretata come &quot;chiamata ad ambiente&quot;);</li>
+<li><code>-s</code>: configura la scala di un pixel della finestra grafica mostrata a schermo, che deve essere un numero intero maggiore di 0.</li>
+</ul>
+<p>Prima dell'avvio delle simulazioni, l'emulatore crea una finestra grafica per simulazione. Questa viene collegata al dispositivo tastiera (cioè vi vengono reindirizzati i caratteri digitati con la finestra selezionata) e al dispositivo video (cioè sulla finestra viene mostrato il framebuffer). Una finestra grafica tipica dell'emulatore viene mostrata in figura. Nell'esempio, viene caricato un firmware contenente un'implementazione del <em>TinyBASIC</em>, quindi viene inserito nella memoria del sistema simulato un semplice programma di &quot;Ciao, mondo!&quot; in BASIC, e ne viene richiesta l'esecuzione.</p>
+</main>
+</body>

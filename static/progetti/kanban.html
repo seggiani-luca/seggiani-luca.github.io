@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<nav>
+<ul>
+<li><a href=/index.html>Index</a></li>
+<li><a href=/altro.html>Altro</a></li>
+<li><a href=/appunti.html>Appunti</a></li>
+<li><a href=/progetti.html>Progetti</a></li>
+</ul>
+</nav>
+<main>
+<h1>Kanban</h1>
+<p>Server e client per un protocollo scritto in C, che realizza il metodo di gestione del lavoro basato su <strong>kanban</strong></p>
+<p>Sono disponibili i sorgenti del client e del server nella <a href="https://github.com/seggiani-luca/kanban">repository</a>.</p>
+<p>I principi che si sono voluti seguire in fase di sviluppo sono:</p>
+<ul>
+<li>Protocollo di trasmissione livello <em>application</em> basato su stringhe ASCII separate da ritorni carrello (<code>\n</code>), leggibili da uomo, ispirato a SMTP.
+Queste stringhe vanno a rappresentare i <em>comandi</em> dell'applicazione in maniera espressiva e su cui è facile fare debugging;</li>
+<li>Comandi fra server e client inviati su TCP, comandi fra client inviati su UDP (con minima affidabilità basata su ritrasmissioni).
+L'uso di socket TCP e UDP sulla stessa porta permette di discriminare gli utenti per porte anche nelle connessioni peer-to-peer;</li>
+<li>Design <em>modulare</em>, dove si divide la funzionalità in appositi moduli <code>core</code>, <code>net</code>, ecc... lato client e server, per maggiore leggibilità;</li>
+<li>Approccio il più semplice possibile: no allocazioni sull'heap, client e server ciascuno su un unico thread di esecuzione Questo è stato fatto per aumentare la robustezza del codice e ridurre la possibilità di errori, con il contro di minore scalabilità.</li>
+</ul>
+</main>
+</body>

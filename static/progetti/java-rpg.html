@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<nav>
+<ul>
+<li><a href=/index.html>Index</a></li>
+<li><a href=/altro.html>Altro</a></li>
+<li><a href=/appunti.html>Appunti</a></li>
+<li><a href=/progetti.html>Progetti</a></li>
+</ul>
+</nav>
+<main>
+<h1>Java RPG</h1>
+<p>Un JRPG distribuito e collaborativo scritto in Java.
+Il nome è un gioco di parole fra &quot;Java RPG&quot; e &quot;Japanese RPG&quot;.</p>
+<p><img src="/pics/java-rpg/battle.png" alt="overhead" /></p>
+<p>Una battaglia in corso</p>
+<p>Sono disponibili le repository del <a href="https://gitlab.com/seggianiluca2004/jrpg.client">client</a> e del <a href="https://gitlab.com/seggianiluca2004/jrpg.server">server</a>.</p>
+<h2>Regole di gioco</h2>
+<p>Il funzionamento del gioco è dettagliato nelle seguenti <a href="https://gitlab.com/seggianiluca2004/jrpg.server/-/raw/main/doc/JRPG.pdf?ref_type=heads&amp;inline=true">slide</a>.
+In breve, abbiamo che un giocatore si registra al sistema creando un suo avatar contenente:</p>
+<ul>
+<li>Nome giocatore;</li>
+<li>Immagine;</li>
+<li>Classe (stregone, paladino, ecc...).
+Ogni avatar contribuisce un certo numero di punti alle campagne a cui partecipa.
+Per ogni avatar si mantiene un campo livello che incrementa per ogni campagna a cui questo partecipa, e scala il numero di punti contribuiiti.
+Il giocatore che ha creato l'avatar non può usare il suo avatar, ma deve usarne di altri.</li>
+</ul>
+<p>Il server rende disponibili un certo numero di campagne.
+Ogni campagna ha bisogno di un certo numero di punti per essere completata.
+Solo quando una campagna viene completata, il server la resetta e si ricomincia da capo.</p>
+<p>Il server mantiene, per ogni campagna, una lista di partecipanti.
+Il server registra quindi gli avatar dei partecipanti ad una campagna in tale lista.
+I successivi utenti che partecipano alla campagna possono scaricare tali avatar, e usarli ciascuno una sola volta per partecipare ad altre campagne (la stessa o un altra) a loro scelta.</p>
+<p>Per accedere alla prima campagna, il server fornisce all'inizio un certo numero di token ad ogni giocatore.
+Questi token possono essere usati per acquistare avatar virtuali.
+La partecipazione ad una campagna con un avatar virtuale porta all'ottenimento di nuovi avatar, e così il giocatore può iniziare a giocare.</p>
+<p><img src="/pics/java-rpg/avatars.png" alt="overhead" /></p>
+<p>Avatar di un giocatore</p>
+<p>In particolare, nel server si mantiene informazione riguardo a:</p>
+<ul>
+<li>I giocatori che partecipano al gioco, i loro avatar personali e gli avatar che possono usare in
+battaglia;</li>
+<li>Le campagne a cui i giocatori possono partecipare, e i nemici da cui sono composte.
+Mentre il client:</li>
+<li>Scarica le informazioni dal server;</li>
+<li>Esegue le battaglie in locale e le sincronizza sul server.</li>
+</ul>
+<h2>Implementazione</h2>
+<p>Il server viene offerto di default a <code>http://localhost:8080/</code>, ed è stato implementato con il pacchetto <code>org.sun.httpserver</code>.
+Si è deciso di adottare questa soluzione anziché alternative come <a href="https://docs.spring.io/spring-boot/index.html">Spring Boot</a> in quanto la funzionalità del server è estremamente semplice.
+Nel dettaglio, le richieste dei client sono tutte di tipo POST, con parametri passati nel corpo della richiesta.
+Il server quindi si limita a rispondere con oggetti JSON serializzati, o stringhe di auth (Login successful, ecc...).</p>
+<p>L'implementazione dell'interfaccia grafica del client viene invece fatta attraverso <a href="https://openjfx.io/">JavaFX</a>.</p>
+</main>
+</body>
