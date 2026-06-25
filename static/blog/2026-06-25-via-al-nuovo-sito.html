@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<header>
+	<a href="/"><img src="/art/logo.png" alt="logo"/></a>
+</header>
+<nav>
+<ul>
+<li><a href=/altro.html>altro</a></li>
+<li><a href=/appunti.html>appunti</a></li>
+<li><a href=/blog.html>blog</a></li>
+<li><a href=/progetti.html>progetti</a></li>
+</ul>
+</nav>
+<main>
+<h1>2026 06 25 via al nuovo sito</h1>
+<p>Test. Prova.
+Ho riscritto tutto il mio sito perché aggiornare la scorsa versione mi faceva venire il mal di testa.
+La <a href="https://github.com/seggiani-luca/seggiani-luca.github.io">repository</a> con tutto il codice (incluso quello di questa pagina) è al solito posto.</p>
+<p>L'idea era di usare qualcosa come <a href="https://jekyllrb.com/">Jekyll</a> in quanto:</p>
+<ul>
+<li>Risulta già integrato in <a href="https://docs.github.com/en/pages">GitHub Pages</a>, servizio di &quot;hosting&quot; che già usavo (e uso ancora), ben integrato con gli strumenti di CI di GitHub;</li>
+<li>Mi permette di scrivere comodamente in Markdown, e si occupa della traduzione in HTML autonomamente.</li>
+</ul>
+<p>Il problema è che questo non è particolarmente divertente, e mi richiede di (re)imparare un nuovo strumento.
+Ad oggi non ho trovato problemi che non si risolvano lanciandogli contro Python.
+Quindi, in mezza giornata e con l'aiuto di Google, ho creato uno script:</p>
+<pre><code class="language-python">[...]
+
+# pulizia 
+clear_dir(stt)
+
+# percorri file sorgente 
+for fr in src.rglob(&quot;*&quot;):
+    to = stt / fr.relative_to(src)
+
+    # ricostruisci directory
+    if fr.is_dir():
+        to.mkdir(parents=True, exist_ok=True)
+    
+    else:
+        to.parent.mkdir(parents=True, exist_ok=True)
+ 
+        # converti file a HTML
+        proc = process(fr)
+        to = to.with_suffix(&quot;.html&quot;)
+        to.write_text(proc, encoding=&quot;utf-8&quot;)
+</code></pre>
+<p>L'idea è di avere 2 directory separate:</p>
+<ul>
+<li>Una directory <code>source</code>, che contiene il mio sorgente in Markdown (da cui generare la pagina);</li>
+<li>Una directory <code>static</code>, che contiene le pagine HTML generate.</li>
+</ul>
+<p>Quindi, il sito si costruisce:</p>
+<ol>
+<li>Percorrendo la directory <code>source</code>;</li>
+<li>Prendendo i file <code>.md</code> e convertendoli in <code>.html</code>;</li>
+<li>Inserendo tali file in una gerarchia di directory, a partire da <code>static</code>, che rispecchi quella di <code>source</code>.</li>
+</ol>
+<h2>Preprocessore</h2>
+<p>La funzione <code>process()</code> si occupa della conversione da <code>.md</code> a <code>.html</code>.
+La maggior parte del lavoro sporco viene fatta dalla libreria <a href="https://pypi.org/project/markdown-it-py/">markdown-it-py</a>.
+Ciò che ho introdotto è uno stadio di preprocessing che mi permette di usare macro speciali nel mio Markdown.
+Ad esempio, per realizzare un indice di pagine, posso dire:</p>
+<pre><code class="language-Markdown"># Indice
+Il mio splendido indice
+
+\{\{ create_list pagine \}\}
+</code></pre>
+<p>dove mi è toccato fare l'escape delle parentesi graffe perché il mio codice è anche troppo zelante nel riconoscere le macro.</p>
+<p>Il seguente codice viene preso dallo script Python, espanso attraverso la regex (abbastanza complicata, per visualizzarla è comodo <a href="https://regex101.com/">regex101</a>):</p>
+<pre><code>\{\{\s*(\w+)\s+(.*?)\s*\}\}
+</code></pre>
+<p>Questa mi dà due gruppi:</p>
+<ul>
+<li>La parola chiave che identifica la macro (qui <code>create_list</code>);</li>
+<li>Una lista di argomenti.</li>
+</ul>
+<p>Quindi posso passare tali argomenti alla macro giusta (individuata sempre nello script), e realizzare qualsiasi funzionalità dinamica che voglio in Python.
+In questo caso mi basta scansionare la directory indicata e realizzare un'elenco di link alle entrate trovate.
+Così ho realizzato tutti gli indici del sito.</p>
+<p>Altre macro si possono realizzare a discrezione (magari per elementi di pagina che vanno ripetuti fra più pagine, ecc...).
+Per ora non ho trovato altre cose da farci.
+Però si può chiamare qualsiasi funzione del Python (uso la mappa <code>global()</code> per risolvere la parola chiave), quindi sicuramente c'è la possibilità di fare danni.</p>
+<h2>Temi</h2>
+<p>Non c'è gusto a sviluppare siti Web senza toccare mai il CSS.
+Quindi ho creato un'ulteriore directory, <code>theme</code>, dove ho inserito:</p>
+<ul>
+<li>Gli stili CSS e vari effetti grafici;</li>
+<li>Template per alcune sezioni di pagina che voglio controllare a parte (header e footer).</li>
+</ul>
+<p>Quello che faccio nello script Python è:</p>
+<ul>
+<li>Copiare tutti i file non <code>.html</code> della directory <code>theme</code> nella directory <code>static</code>;</li>
+<li>Includere le sezioni di pagina giuste (header e footer) in ogni pagina statica generata.</li>
+</ul>
+<p>In questo modo posso stilizzare il sito in maniera simile (se non più rudimentale) a quanto offerto da Jekyll.</p>
+<p>Resta da creare un tema vero e proprio.
+Sono rimasto affascinato da siti &quot;vecchio stile&quot; come quello di <a href="https://www.wriks.motorcycles/">wriks</a>, se non da siti vecchi davvero come <a href="https://www.pouet.net/">Pouet</a> (che ho spudoratamente copiato).
+Quindi ho cercato di replicare quello stesso stile, testo piccolo, un sacco di effetti base CSS e loghi in stile demoscene.
+Ho persino aggiunto i badge 88x31 delle tecnologie usate a fondo pagina, per il massimo effetto &quot;Netscape Navigator&quot;.</p>
+<p>Trovo che il risultato è (a me) abbastanza gradevole.
+Se non altro, uno stile così minimalista rispetta l'architettura (altrettanto minimalista) di tutto il sito.
+Semplice è bello.</p>
+</main>
+<footer>
+	<div class="badges">
+		<a href="https://archlinux.org/"><img src="/art/badges/arch.gif" alt="arch" title="i use arch btw" height=31 width=88/></a>
+		<a href="https://github.com/"><img src="/art/badges/github.gif" alt="github" title="hosted on github pages" height=31 width=88/></a>
+		<a href="https://neovim.io/"><img src="/art/badges/neovim.gif" alt="neovim" title="fully written with riced neovim" height=31 width=88/></a>
+		<a href="https://www.python.org/"><img src="/art/badges/python.png" alt="python" title="static pages served by python" height=31 width=88/></a>
+	</div>
+	<p>Luca Seggiani - 2026</p>
+</footer>
+</body>

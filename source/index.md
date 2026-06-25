@@ -8,6 +8,12 @@ Lo uso per raccogliere cose che ho fatto, fra cui:
 - Progetti di sviluppo software che ho realizzato;
 - Altre cose che mi passano per la testa.
 
+## Blog
+
+Ultimi 10 post dal blog:
+
+{{ create_list blog }}
+
 ## Appunti
 
 Probabilmente sei qui per i miei [appunti](/appunti.html) (corsi di Ingegnera Informatica e affini).

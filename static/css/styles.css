@@ -147,6 +147,18 @@ footer {
 	margin-top: 10px;
 
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+}
+
+.badges {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.badges a img {
+	image-rendering: pixelated;
 }

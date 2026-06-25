@@ -32,27 +32,32 @@ small = {"di", "ed", "e", "a", "da", "in", "su", "per", "tra", "fra"}
 def create_title(nam):
     # tokenize string
     words = nam.split("-")
-
-    # capitalize first word
-    out = [words[0].capitalize()]
-
-    # capitalize tokens not forced to small
-    for w in words[1:]:
-        out.append(w if w.lower() in small else w.capitalize())
-    return " ".join(out)
+    return " ".join(words)
 
 # creates a list 
-def create_list(dr):
+def create_list(dr, n=0):
     # directory relative to source
     dr = src / dr
 
     res = "<ul>\n"
 
     # populate list
-    for fr in dr.glob("*"):
+    lst = dr.glob("*")
+    if n != 0:
+        # last n
+        lst = sorted(lst, reverse=True)[0:n]
+    else:
+        # all
+        lst = sorted(lst)
+
+    for fr in lst:
         # check for .md files
         if fr.suffix != ".md":
             continue 
+
+        # skip index
+        if fr.stem == "index":
+            continue
 
         # insert in list
         rel = "/" + str(fr.with_suffix(".html").relative_to(src))
