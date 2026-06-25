@@ -8,6 +8,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
+<header>
+	<img src="/art/logo.png" alt="logo"/>
+</header>
 <nav>
 <ul>
 <li><a href=/index.html>Index</a></li>
@@ -27,11 +30,11 @@
 <p>Vediamo innanzitutto come queste regole di adiacenza vengono definite nel codice. Per ogni casella si avrà:</p>
 <pre><code class="language-C#">class Tile {
 	// number of layers this tile defines adjacency rules for
-	\[Min(1)\]
+	[Min(1)]
 	public int layers = 1;
 
 	// flag enum for adjacency directions
-	\[Flags\]
+	[Flags]
 	public enum Adjacency
 	{
 		None = 0,
@@ -42,7 +45,7 @@
 	}
 		
 	// array of adjaciencies for each layer
-	public Adjacency\[\] adjacencies;
+	public Adjacency[] adjacencies;
 
 	// ...
 }
@@ -78,33 +81,33 @@ public float getEntropy()
 private void collapseTile(int r, int c)
 {
 	// get tile set at coordinate
-	TileSet set = grid\[r, c\];
+	TileSet set = grid[r, c];
 
 	// collapse tile set
 	set.collapse(rng);
 
 	// get adjacency
-	Tile.Adjacency\[\] adjacencies = set.getAdjacencies();
+	Tile.Adjacency[] adjacencies = set.getAdjacencies();
 
 	// use adjacency to mask neighboring tiles
 	if (r &lt; rows - 1)
 	{
-		grid\[r + 1, c\].restrict(adjacencies, 
+		grid[r + 1, c].restrict(adjacencies, 
 	 		Tile.Adjacency.North);
 	}
 	if (c &lt; cols - 1)
 	{
-		grid\[r, c + 1\].restrict(adjacencies, 
+		grid[r, c + 1].restrict(adjacencies, 
 	 		Tile.Adjacency.East);
 	}
 	if (r &gt; 0)
 	{
-		grid\[r - 1, c\].restrict(adjacencies, 
+		grid[r - 1, c].restrict(adjacencies, 
 			Tile.Adjacency.South);
 	}
 	if (c &gt; 0)
 	{
-		grid\[r, c - 1\].restrict(adjacencies, 
+		grid[r, c - 1].restrict(adjacencies, 
 			Tile.Adjacency.West);
 	}
 }
@@ -197,7 +200,7 @@ private void collapseTile(int r, int c)
 <p>Quindi, la trasformazione dei <code>TileStack</code> in <code>TileSet</code> si fa in maniera ricorsiva con backtracking considerando tutte le possibili combinazioni di stati ad ogni livello. Per questo è predisposta una funzione:</p>
 <pre><code class="language-C#">// performs a recursive step to get the combinations from a tile stack
 private static void populateTileSet(
-	TileStack.TileList\[\] lists,           // tile lists
+	TileStack.TileList[] lists,           // tile lists
 	int depth,                            // depth of the current step
 	List&lt;TileInstance.Component&gt; current, // current component list 
 	TileSet result)                       // result set 
@@ -213,7 +216,7 @@ private static void populateTileSet(
 	}
 
 	// get the next tile list
-	Tile\[\] tiles = lists\[depth\].tiles;
+	Tile[] tiles = lists[depth].tiles;
 
 	// go through each tile in the list
 	foreach (Tile tile in tiles)
@@ -236,7 +239,7 @@ private static void populateTileSet(
 <p>A questo punto la logica dell'algoritmo WFC è semplice. Ad esempio, per restringere una <code>TileSet</code> ai soli stati concessi da un adiacenza in una data direzione, basta controllare tutti i casi precalcolati:</p>
 <pre><code class="language-C#">// collapse tile set to tiles that satisfy given adjacency in direction
 public bool restrict(
-	Tile.Adjacency\[\] baseAdjacencies, // requested adjacency 
+	Tile.Adjacency[] baseAdjacencies, // requested adjacency 
 	Tile.Adjacency direction)         // in which direction
 {
 	// get opposite direction 
@@ -246,18 +249,18 @@ public bool restrict(
 	int removed = instances.RemoveWhere(tileInstance =&gt;
 	{
 		// get the adjacencies of the candidate
-		Tile.Adjacency\[\] candidate = tileInstance.getAdjacencies();
+		Tile.Adjacency[] candidate = tileInstance.getAdjacencies();
 
 		// check on each layer
 		for (int i = 0; i &lt; layers; i++)
 		{
 			// base tile has adjacency in this direction?
 			bool baseHasEdge
-	 			= (baseAdjacencies\[i\] &amp; direction) != 0;
+	 			= (baseAdjacencies[i] &amp; direction) != 0;
 
 			// candidate has adjacency in this direction?
 			bool candidateHasEdge 
-	 			= (candidate\[i\] &amp; opposite) != 0;
+	 			= (candidate[i] &amp; opposite) != 0;
 
 			// if adjacencies don't match remove candidate
 			if (baseHasEdge != candidateHasEdge) return true;
@@ -291,7 +294,7 @@ float noise = Mathf.PerlinNoise(
 noise = Mathf.SmoothStep(0f, 1f, noise);
 
 // make selection
-int selection = (int)(noise \* factors.list\[i\].options.Length);
+int selection = (int)(noise \* factors.list[i].options.Length);
 </code></pre>
 <p>Un esempio dell'esecuzione di questo algoritmo si ha visualizzando come vengono disposte le zone. Indichiamo in verde le zone residenziali, in blu le zone commerciali, ed in giallo le zone industriali:</p>
 <p><img src="/pics/unity-cities/zoning.png" alt="zoning" /></p>
@@ -312,4 +315,7 @@ int selection = (int)(noise \* factors.list\[i\].options.Length);
 <p><img src="/pics/unity-cities/night_06_00.png" alt="night" /></p>
 <p>Cielo di notte alle 6:00 AM</p>
 </main>
+<footer>
+	<p>Luca Seggiani - 2026</p>
+</footer>
 </body>

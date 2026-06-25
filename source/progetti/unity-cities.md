@@ -17,11 +17,11 @@ Vediamo innanzitutto come queste regole di adiacenza vengono definite nel codice
 ```C#
 class Tile {
 	// number of layers this tile defines adjacency rules for
-	\[Min(1)\]
+	[Min(1)]
 	public int layers = 1;
 
 	// flag enum for adjacency directions
-	\[Flags\]
+	[Flags]
 	public enum Adjacency
 	{
 		None = 0,
@@ -32,7 +32,7 @@ class Tile {
 	}
 		
 	// array of adjaciencies for each layer
-	public Adjacency\[\] adjacencies;
+	public Adjacency[] adjacencies;
 
 	// ...
 }
@@ -72,33 +72,33 @@ Lo svolgimento dell'algoritmo, quindi, è sintetizzato grossomodo nei seguenti p
     private void collapseTile(int r, int c)
     {
     	// get tile set at coordinate
-    	TileSet set = grid\[r, c\];
+    	TileSet set = grid[r, c];
     
     	// collapse tile set
     	set.collapse(rng);
     
     	// get adjacency
-    	Tile.Adjacency\[\] adjacencies = set.getAdjacencies();
+    	Tile.Adjacency[] adjacencies = set.getAdjacencies();
     
     	// use adjacency to mask neighboring tiles
     	if (r < rows - 1)
     	{
-    		grid\[r + 1, c\].restrict(adjacencies, 
+    		grid[r + 1, c].restrict(adjacencies, 
     	 		Tile.Adjacency.North);
     	}
     	if (c < cols - 1)
     	{
-    		grid\[r, c + 1\].restrict(adjacencies, 
+    		grid[r, c + 1].restrict(adjacencies, 
     	 		Tile.Adjacency.East);
     	}
     	if (r > 0)
     	{
-    		grid\[r - 1, c\].restrict(adjacencies, 
+    		grid[r - 1, c].restrict(adjacencies, 
     			Tile.Adjacency.South);
     	}
     	if (c > 0)
     	{
-    		grid\[r, c - 1\].restrict(adjacencies, 
+    		grid[r, c - 1].restrict(adjacencies, 
     			Tile.Adjacency.West);
     	}
     }
@@ -204,7 +204,7 @@ Quindi, la trasformazione dei `TileStack` in `TileSet` si fa in maniera ricorsiv
 ```C#
 // performs a recursive step to get the combinations from a tile stack
 private static void populateTileSet(
-	TileStack.TileList\[\] lists,           // tile lists
+	TileStack.TileList[] lists,           // tile lists
 	int depth,                            // depth of the current step
 	List<TileInstance.Component> current, // current component list 
 	TileSet result)                       // result set 
@@ -220,7 +220,7 @@ private static void populateTileSet(
 	}
 
 	// get the next tile list
-	Tile\[\] tiles = lists\[depth\].tiles;
+	Tile[] tiles = lists[depth].tiles;
 
 	// go through each tile in the list
 	foreach (Tile tile in tiles)
@@ -246,7 +246,7 @@ A questo punto la logica dell'algoritmo WFC è semplice. Ad esempio, per restrin
 ```C#
 // collapse tile set to tiles that satisfy given adjacency in direction
 public bool restrict(
-	Tile.Adjacency\[\] baseAdjacencies, // requested adjacency 
+	Tile.Adjacency[] baseAdjacencies, // requested adjacency 
 	Tile.Adjacency direction)         // in which direction
 {
 	// get opposite direction 
@@ -256,18 +256,18 @@ public bool restrict(
 	int removed = instances.RemoveWhere(tileInstance =>
 	{
 		// get the adjacencies of the candidate
-		Tile.Adjacency\[\] candidate = tileInstance.getAdjacencies();
+		Tile.Adjacency[] candidate = tileInstance.getAdjacencies();
 
 		// check on each layer
 		for (int i = 0; i < layers; i++)
 		{
 			// base tile has adjacency in this direction?
 			bool baseHasEdge
-	 			= (baseAdjacencies\[i\] & direction) != 0;
+	 			= (baseAdjacencies[i] & direction) != 0;
 
 			// candidate has adjacency in this direction?
 			bool candidateHasEdge 
-	 			= (candidate\[i\] & opposite) != 0;
+	 			= (candidate[i] & opposite) != 0;
 
 			// if adjacencies don't match remove candidate
 			if (baseHasEdge != candidateHasEdge) return true;
@@ -310,7 +310,7 @@ float noise = Mathf.PerlinNoise(
 noise = Mathf.SmoothStep(0f, 1f, noise);
 
 // make selection
-int selection = (int)(noise \* factors.list\[i\].options.Length);
+int selection = (int)(noise \* factors.list[i].options.Length);
 ```
 
 Un esempio dell'esecuzione di questo algoritmo si ha visualizzando come vengono disposte le zone. Indichiamo in verde le zone residenziali, in blu le zone commerciali, ed in giallo le zone industriali:

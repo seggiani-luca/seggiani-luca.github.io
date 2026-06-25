@@ -1,5 +1,6 @@
-# Luca Seggiani
-Studente di Ingegneria Informatica
+# Chi sono?
+
+Studente di Ingegneria Informatica.
 
 Questo è il mio sito Web personale. 
 Lo uso per raccogliere cose che ho fatto, fra cui:

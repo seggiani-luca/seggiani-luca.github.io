@@ -21,6 +21,8 @@ def clear_dir(dr):
 # ---- theme constants
 
 head = thm / "head.html"
+header = thm / "header.html"
+footer = thm / "footer.html"
 
 
 # ---- element macros
@@ -44,7 +46,6 @@ def create_list(dr):
     # directory relative to source
     dr = src / dr
 
-    # begin list
     res = "<ul>\n"
 
     # populate list
@@ -58,19 +59,16 @@ def create_list(dr):
         nam = create_title(fr.stem) 
         res += f"<li><a href={rel}>{nam}</a></li>\n"
 
-    # end list
     res += "</ul>\n"
     return res
 
 # creates a navbar
 def create_nav():
-    # begin nav
     res = "<nav>\n"
 
     # basically a page list
     res += create_list("")
 
-    # end nav
     res += "</nav>\n"
     return res
 
@@ -102,21 +100,24 @@ def process(file):
     res = """<!DOCTYPE html>
 <html lang="it">\n"""
 
-    # append head, begin body
     res += head.read_text(encoding="utf-8")
+
     res += "<body>\n"
 
-    # insert nav
-    res += create_nav()
-    res += "<main>\n"
+    res += header.read_text(encoding="utf-8")
 
-    # read markdown contents, preprocess, render
+    res += create_nav()
+
+    res += "<main>\n"
+    
     md = file.read_text(encoding="utf-8")
     md = preprocess(md)
     res += renderer.render(md)
-
-    # end body
+    
     res += "</main>\n"
+    
+    res += footer.read_text(encoding="utf-8")
+   
     res +="</body>\n"
     return res
 

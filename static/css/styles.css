@@ -1,18 +1,40 @@
 :root {
-    --bg: #ffffff;
-    --fg: #000000;
-    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-    --serif: Georgia, serif;
-    --sans: system-ui, -apple-system, Segoe UI, sans-serif;
+    /* colors */
+	--page-bg:   #2f5f95;
+	--header-bg: #1d3f7a;
+	--table-bg:  #4a6f9a;
+	--code-bg:   #3f5f8a;
+
+	--link:      #b7e0ff;
+
+	--accent0:   #ffd166;
+	--accent1:   #ff7a00;
+
+	--fg:        #ffffff;
+   
+	/* fonts */
+	--mono: monospace;
+    --sans: Helvetica, Arial, sans-serif;
+}
+
+/* body */
+
+html {
+	background: url("/art/bg.svg");
+	background-size: 1000px;
+	background-attachment: fixed;
 }
 
 body {
-	background: var(--bg);
-    color: var(--fg);
-	font-family: var(--serif);
-	max-width: 800px;
 	margin-left: auto;
 	margin-right: auto;
+	
+    color: var(--fg);
+	
+	font-family: var(--sans);
+	font-size: 90%;
+	
+	max-width: 800px;
 }
 
 @media (max-width: 800px) {
@@ -21,20 +43,110 @@ body {
 	}
 }
 
-nav ul {
-	font-family: var(--sans);
-	padding-left: 0;
-	list-style: none;
+/* header */
+
+header {
 	display: flex;
-	gap: 10px;
 	align-items: center;
+	justify-content: center;
+}
+
+header img {
+	width: 100%;
+}
+
+/* nav */
+
+nav ul {
+	margin-top: 0;
+	padding-left: 0;
+
+	background-color: var(--header-bg);
+	border: solid 1px var(--link);
+
+	list-style: none;
+	
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+/* main */
+
+main {
+	background-color: var(--table-bg);
+	border: solid 5px var(--header-bg);
+}
+
+p {
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	
+	margin-top: 0;
+	margin-bottom: 5px;
+}
+
+a {
+	color: var(--link);
+	
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
 }
 
 h1, h2, h3 {
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	
+	margin-top: 0;
+	margin-bottom: 5px;
+	
+	background:
+		linear-gradient(90deg, var(--header-bg) 50%, rgba(0, 0, 0, 0) 100%),
+		radial-gradient(circle, var(--link) 1px, var(--header-bg) 1px);
+	background-size: 
+		100% auto, 
+		10px 100%;
+    
 	font-family: var(--sans);
-    border-bottom: 1px solid black;
+	text-transform: lowercase;
+	font-size: 18px;
 }
 
-img {
-	width: 100%;
+h1 {
+	border-top: none;
+}
+
+p img {
+	margin-left: auto;
+	margin-right: auto;
+
+	display: block;
+	max-width: 90%;
+
+	border: solid 5px var(--code-bg);
+}
+
+pre {
+	padding: 5px;
+	
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	
+	background-color: var(--code-bg);
+}
+
+/* footer */
+
+footer {
+	margin-top: 10px;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
