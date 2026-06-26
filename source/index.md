@@ -12,17 +12,17 @@ Lo uso per raccogliere cose che ho fatto, fra cui:
 
 Ultimi 10 post dal blog:
 
-{{ create_list blog }}
+{{ create_list blog 10 }}
 
 ## Appunti
 
 Probabilmente sei qui per i miei [appunti](/appunti.html) (corsi di Ingegnera Informatica e affini).
 Ricordo che potrebbero esserci refusi, e questo materiale non intende in nessun modo sostituirsi ai libri di testo o alle lezioni frontali.
 
-{{ create_list appunti/triennale }}
+{{ create_list appunti/triennale 0 True }}
 
 ## Progetti
 
 Ho raccolto alcuni dei miei [progetti](/progetti.html) più significativi, con allegate le relative documentazioni.
 
-{{ create_list progetti }}
+{{ create_list progetti 0 True}}

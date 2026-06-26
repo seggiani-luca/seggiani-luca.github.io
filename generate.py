@@ -35,19 +35,23 @@ def create_title(nam):
     return " ".join(words)
 
 # creates a list 
-def create_list(dr, n=0):
+def create_list(dr, n=0, rec=False):
     # directory relative to source
     dr = src / dr
 
     res = "<ul>\n"
 
-    # populate list
-    lst = dr.glob("*")
+    # recurse or not?
+    if rec:
+        lst = dr.rglob("*")
+    else:
+        lst = dr.glob("*")
+    
+    # last n or all?
+    n = int(n)
     if n != 0:
-        # last n
         lst = sorted(lst, reverse=True)[0:n]
     else:
-        # all
         lst = sorted(lst)
 
     for fr in lst:

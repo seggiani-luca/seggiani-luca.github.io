@@ -76,6 +76,8 @@ Così ho realizzato tutti gli indici del sito.
 Altre macro si possono realizzare a discrezione (magari per elementi di pagina che vanno ripetuti fra più pagine, ecc...).
 Per ora non ho trovato altre cose da farci.
 Però si può chiamare qualsiasi funzione del Python (uso la mappa `global()` per risolvere la parola chiave), quindi sicuramente c'è la possibilità di fare danni.
+Ad esempio, se volessi implementare qualcosa di ridicolo come un generatore casuale di classifiche delle canzoni dei Sonic Youth che posso piazzare dove mi pare in una pagina, potrei farlo senza chiedere il permesso a nessuno.
+Forse vale la pena di aver riscritto la mia versione peggiore di Jekyll.
 
 ## Temi
 
@@ -98,3 +100,31 @@ Ho persino aggiunto i badge 88x31 delle tecnologie usate a fondo pagina, per il 
 Trovo che il risultato è (a me) abbastanza gradevole.
 Se non altro, uno stile così minimalista rispetta l'architettura (altrettanto minimalista) di tutto il sito.
 Semplice è bello.
+
+## Logo
+
+Pouet (link sopra) ha di interessante che il logo cambia ogni volta che si aggiorna la pagina.
+Quindi ci sono tutti questi loghi carini che si alternano.
+
+Fare la stessa cosa, dove ogni logo è il mio nome, mi sembrava un po' troppo, per cui ho deciso di fare almeno un logo in stile demoscene (alcuni ottimi esempi si trovano qui [qui](https://demoscenelogogallery.org/), comunque lo stile è quello delle distribuzioni software pirata che si trovavano su PirateBay, pensa Razor1911).
+Lo stile che ho cercato di imitare è quello dei loghi in 3D, di un bell'arancione che complementa bene i toni di blu del resto della pagina.
+Su Blender ho realizzato la seguente scena:
+
+![logo blender](/pics/blog/logo_blender.png)
+
+Scena su Blender
+
+dove semplicemente ho estruso il testo generato da [questo](https://www.dafont.com/it/father-galaxy.font?text=seggianiLu.ca) font, con la stringa `seggianiLu.ca` (il punto è perché il nome di dominio `seggianilu.ca` è libero e prima o poi lo comprerò dall'autorità canadese).
+Ho usato una versione estrusa e con le normali invertite del logo per realizzare un "contorno" in tinta unita del testo (come si vede [qui](https://bnpr.gitbook.io/bnpr/outline/inverse-hull-method))
+Per il materiale ho realizzato la seguente shader NPR con l'editor di Blender:
+
+![logo shader](/pics/blog/logo_shader.png)
+
+Shader su Blender
+
+dove l'obiettivo è di avere dei colori arancioni fissi, e separazione fra i caratteri data dall'effetto Fresnel.
+Quindi, ho preso l'immagine renderizzata e l ho portata su Gimp per alcuni ritocchi (un po' di effetti di luce e di ombra).
+
+Il risultato è il seguente, che credo sia abbastanza carino:
+
+![log](/art/logo.png)
