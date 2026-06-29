@@ -128,3 +128,5 @@ Quindi, ho preso l'immagine renderizzata e l ho portata su Gimp per alcuni ritoc
 Il risultato è il seguente, che credo sia abbastanza carino:
 
 ![log](/art/logo.png)
+
+Logo finito

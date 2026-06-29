@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<header>
+	<a href="/"><img src="/art/logo.png" alt="logo"/></a>
+</header>
+<nav>
+<ul>
+<li><a href=/altro.html>altro</a></li>
+<li><a href=/appunti.html>appunti</a></li>
+<li><a href=/blog.html>blog</a></li>
+<li><a href=/progetti.html>progetti</a></li>
+</ul>
+</nav>
+<main>
+<h1>2026 06 28 esperimenti 3d</h1>
+<p>Da un po' di tempo sono interessato allo sviluppo di motori grafici.
+Questo perché ho avuto un po' di esperienza con <a href="https://unity.com/">Unity</a> (ad esempio <a href="/progetti/unity-cities.html">qui</a>), e prima o poi era chiaro che mi sarebbe venuto voglia di provare a reimplementare qualcosa del genere.</p>
+<p>Ora, visto che è abbastanza improbabile che io reimplementi un motore che è in circolazione da anni e viene mantenuto da un team di diverse persone, per iniziare mi sono accontentato di renderizzare qualche wireframe a schermo.
+Avevo sentito parlare della <a href="https://www.libsdl.org/">SDL</a> (e l'avevo anche usata per qualche progetto stupido), per cui ho deciso di iniziare da lì per disegnare qualcosa a schermo.</p>
+<p>Nota!
+Ho buttato il codice descritto in questo articolo in questa <a href="https://github.com/seggiani-luca/rendering-experiments/tree/main/render_0">repository</a>.
+Sulla mia macchina (Arch Linux, aggiornato a Giugno 2026) funziona, ma non ho fatto nessuno sforzo per assicurarmi che fosse portatile o quantomeno stabile.
+Più che altro lo allego a scopo sperimentale e didattico.</p>
+<h2>Buffer</h2>
+<p>L'idea è di avere un semplicissimo header <code>buffer.h</code> che fa da &quot;lavagna&quot;, cioè permette di:</p>
+<ol>
+<li>Creare una finestra contenente un buffer di pixel;</li>
+<li>Cambiare il colore di un qualsiasi pixel.</li>
+</ol>
+<p>Questa funzionalità di base si può quindi estendere per disegnare linee e triangoli.
+Il risultato è una cosa del genere:</p>
+<pre><code class="language-c">// buffer.h
+
+// gets called once at the start of runtime 
+void init();
+
+// gets called once at the end of runtime 
+void destroy();
+
+// gets called for each frame
+void update(float delta);
+
+// typedef for colors
+typedef uint32_t color;
+
+// gets a single SDL color out of RGB components
+color rgb(uint8_t r, uint8_t g, uint8_t b);
+
+// plots a pixel on the screen
+void pixel(int x, int y, color col);
+
+// plots a line on the screen
+void line(int x0, int y0, int x1, int y1, color col);
+</code></pre>
+<p>L'implementazione di questi è banale (per la SDL ci sono ottimi tutorial come <a href="https://lazyfoo.net/tutorials/SDL/">questi</a>).
+Il tipo <code>color</code> è necessario in quanto per SDL un colore è rappresentato da 3 interi su 8 bit (<code>r</code>, <code>g</code> e <code>b</code> per i canali Rosso, Grerde e Blu), impacchettati in un intero da 32 bit secondo un formato specifico (attraverso <code>SDL_MapRGB(surface-&gt;format, r, g, b)</code>).</p>
+<p>Più interessante è il tracciamento delle linee, che usa l’<a href="https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm">algoritmo di Bresenham</a>.
+Non starò a dilungarmi sulla teoria (c'è un ottima spiegazione <a href="https://www.youtube.com/watch?v=CceepU1vIKo">qui</a>).
+L’idea è discretizzare una retta scegliendo l’asse dominante (x o y), cioè la direzione in cui avanzare a ogni step.
+Durante l’avanzamento si accumula un errore rispetto alla retta ideale; quando questo supera 0.5, si incrementa anche la coordinata sull’asse secondario.</p>
+<p>A questo punto dobbiamo:</p>
+<ol>
+<li>Importare delle <em>mesh</em>, cioè degli insiemi di triangoli che rappresentano gli oggetti che vogliamo renderizzare a schermo;</li>
+<li>Definire delle <em>scene</em>, cioè collezioni di mesh disposte nello spazio;</li>
+<li>Fare un po' di algebra lineare per ricavare la posizione dei punti delle mesh sullo schermo, in relazione ad una certa <em>telecamera</em> virtuale.</li>
+</ol>
+<h2>Mesh</h2>
+<p>Per il punto 1. ho deciso di importare il formato <a href="https://en.wikipedia.org/wiki/Wavefront_.obj_file">Wavefront <code>.obj</code></a> in quanto è semplice e in formato testo.
+Blender, con un po' di configurazione, permette di generare file <code>.obj</code> molto semplici:</p>
+<p><img src="/pics/blog/render0_blender_preset.png" alt="preset blender" /></p>
+<p>Configurazione exporter Blender</p>
+<p>La cui struttura testuale è:</p>
+<pre><code class="language-obj"># vertici
+v -6.000000 0.000000 8.000000
+v -4.000000 0.000000 8.000000
+v -4.000000 0.000000 6.000000
+[...]
+
+# facce
+f 2 5 1
+f 5 6 4
+f 9 11 8
+[...]
+</code></pre>
+<p>Tutte le informazioni in un file <code>.obj</code> sono rappresentate da buffer.
+Il primo buffer (sempre presente) è quello dei vertici, rappresentati dal carattere <code>v</code> e 3 numeri in virgola mobile (le coordinate del vertice).
+In file più complessi ci sono poi i buffer delle normali e delle coordinate UV (di cui forse parlerò in seguito).
+In fondo c'è sempre un buffer di facce, che altro non sono che triple di puntatori ai buffer definiti prima.
+Ad esempio, in questo caso banale dove c'è solo il buffer di vertici, una faccia è data da 3 indici, che indicizzano appunto i vertici nel buffer.</p>
+<p>Per rappresentare una mesh in memoria ci dotiamo quindi dei seguenti struct:</p>
+<pre><code class="language-c">typedef struct {
+	int a;
+	int b;
+	int c;
+} triangle;
+
+typedef struct  {
+    // array di vertici
+	vector3* verts;
+	int n_verts;
+
+    // array di triangoli
+	triangle* tris;
+	int n_tris;
+
+    // numero di riferimenti
+	int refs;
+} mesh;
+</code></pre>
+<p>che rispecchiano direttamente la struttura del formato <code>.obj</code>.
+Basterà leggere tutte le righe di un file in tale struct per caricare una mesh in memoria: quindi questa potrà essere renderizzata.</p>
+<p>Una particolarità è data dal campo <code>refs</code>.
+Assunto che in una scena una stessa mesh può essere usata più volte, è opportuno dotarsi di una tabella di risorse: quando si carica una mesh per la prima volta, la si inserisce in un'entrata della tabella di risorse e si restituisce un puntatore a tale entrata.
+Da lì in poi, per accedere alla stessa mesh basta ottenere lo stesso puntatore, senza doverla ricaricare dal disco.</p>
+<p>Questo meccanismo (sostanzialmente di caching) viene implementato creando una tabella:</p>
+<pre><code class="language-c">typedef struct {
+	char path[MESH_NAME_LEN];
+	mesh* mesh;
+} mesh_cache_entry;
+
+// tabella di mesh 
+static mesh_cache_entry mesh_cache[MESH_CACHE_LEN];
+</code></pre>
+<p>e definendo una funzione che importi le mesh, solo dopo aver controllato di non averle già in cache.
+In pseudocodice:</p>
+<pre><code class="language-c">mesh* import_mesh(const char* path) {
+	// cerca nella cache 
+	for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
+		mesh_cache_entry* entry = &amp;mesh_cache[i];
+
+		if(entry-&gt;mesh != NULL &amp;&amp; strcmp(entry-&gt;path, path) == 0) { // match su percorso
+			entry-&gt;mesh-&gt;refs++; // conta
+			return entry-&gt;mesh;  // restituisci
+		}
+	}
+
+    // carica mesh da file
+    [...]
+	
+    // alloca mesh
+	mesh* m = malloc(sizeof(mesh));
+	*m = (mesh){verts, n_verts, tris, n_tris, 1};
+
+    // registra mesh nella cache
+	for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
+		mesh_cache_entry* entry = &amp;mesh_cache[i];
+
+		if(entry-&gt;mesh == NULL) {
+			strncpy(entry-&gt;path, path, MESH_NAME_LEN - 1); // copia percorso
+			entry-&gt;path[MESH_NAME_LEN - 1] = '\0';
+			entry-&gt;mesh = m;                               // assegna mesh
+			break;
+		}
+	}
+
+	return m;
+}
+</code></pre>
+<p>In questo caso il contatore di riferimenti <code>refs</code> è utile per capire se una mesh nella tabella può essere liberata, o è ancora riferita da oggetti nella scena.</p>
+<h2>Scene</h2>
+<p>Una scena è un albero di oggetti, che dovranno avere degli attributi come:</p>
+<ol>
+<li>Posizione, rotazione e scala nella scena (solitamente detti <em>transform</em> o <em>trasformazione</em> dell'oggetto);</li>
+<li>Mesh che usano;</li>
+<li>Altri attributi grafici come colore, materiale, ecc...</li>
+</ol>
+<p>Quindi, se si accetta di adottare il modello più semplice possibile, una scena è una lista concatenata di oggetti da renderizzare in sequenza.
+In codice questo equivale a:</p>
+<pre><code class="language-c">typedef struct object {
+	// nome
+	char name[OBJ_NAME_LEN + 1];
+
+	// mesh e colore
+	mesh* mesh;
+	color col;
+
+	// transform 
+	vector3 point;
+	vector3 euler;
+	vector3 scale;
+
+	struct object* next;
+} object;
+
+// lista di oggetti da renderizzare, sostanzialmente la scena
+extern object* obj_list;
+</code></pre>
+<p>Questo modello rende sia il rendering che la serializzazione/deserializzazione di scene molto semplice, in quanto in entrambi i casi si scorrono liste (e le liste sono molto facili da serializzare, a differenza degli alberi che vanno scritti in qualche tipo di ordine).</p>
+<p>Notiamo che si usano i tipi <code>vector3</code>: per questi ho definito il mio piccolissimo header di algebra lineare (<code>vector.h</code>), che include definizioni di vettori, matrici, e alcune funzioni di base.
+Lo vedremo più nel dettaglio fra poco.</p>
+<p>Vediamo anche che la rotazione viene codificata nel campo <code>euler</code>: gli <a href="https://it.wikipedia.org/wiki/Angoli_di_Eulero">angoli di Eulero</a> sono un modo semplice (e in verità abbastanza limitato) per rappresentare la rotazione degli oggetti nello spazio.
+Consistono nei 3 angoli (attorno agli assi X, Y e Z) con cui dobbiamo ruotare il corpo per ottenere una certa rotazione.
+Notiamo che l'ordine con cui si applicano le rotazioni è importante!
+Qui si è usato l'ordine Z, Y, X.</p>
+<h2>Rendering</h2>
+<p>Possiamo finalmente provare a renderizzare qualcosa a schermo.
+Il piano è semplice: una volta che le mesh sono state configurate e assemblate in una simpatica lista di oggetti (che chiamiamo scena), basterà scorrere tutti gli oggetti, disegnandone ciascuno a schermo.</p>
+<p>Per disegnare un oggetto, che ha la sua posizione, rotazione e scala (trasformazione) nella secna, dobbiamo capire da dove lo guardiamo, cioè definire una telecamera virtuale.
+La mettiamo nel seguente struct:</p>
+<pre><code class="language-c">typedef struct {
+	vector3 point; // dove si trova?
+	vector3 euler; // dove sta guardando?
+	float focal;   // lunghezza focale
+} camera;
+
+// telecamera della secna 
+static camera cam;
+</code></pre>
+<p><code>point</code> è chiaramente la posizione della telecamera.
+<code>euler</code> è la rotazione, nello stesso formato visto prima per gli oggetti.
+Infine, <code>focal</code> è la lunghezza focale.</p>
+<p>Non bisogna essere fotografi per capire il ruolo della lunghezza focale.
+L'idea è di considerare una <a href="https://it.wikipedia.org/wiki/Camera_oscura">camera oscura</a>, cioè una scatola con un foro che lascia passare la luce.
+Dal punto di vista matematico, il foro è infinitamente piccolo e della scatola ci interessa solo la parete opposta al foro.
+Questa parete sarà la superficie su cui comparirà la proiezione bidimensionale del mondo tridimensionale che sta dall'altra parte del foro.</p>
+<p>Questa situazione è modellizzata in 2D nel seguente Desmos (metà del motivo di questa spiegazione era provare ad includere i grafici Desmos nella pagina).
+Si possono spostare i punti P1, P2 e P3, e vedere come viene aggiornata la proiezione sulla parete della camera oscura!</p>
+<iframe src="https://www.desmos.com/calculator/6igulxk1ql" class="calc"></iframe>
+<p>Camera oscura in 2D</p>
+<p>La stessa cosa si ripete in 3D, per cui possiamo fare cose più sofisticate come nel seguente Desmos:</p>
+<iframe src="https://www.desmos.com/3d/vkuycclpal" class="calc"></iframe>
+<p>Camera oscura in 3D</p>
+<p>In questo caso ho scelto di renderizzare un cubo in 3D, con la possibilità di ruotarlo.
+Per le matrici di rotazione (che ci torneranno utili a breve) rimando a quanto scritto <a href="https://seggiani-luca.github.io/quartz/Meccanica-Razionale/Matrici-di-rotazione">qui</a>, che è un po formale, ma dovrebbe spiegare la forma che usiamo:</p>
+<pre><code class="language-c">matrix3 rot_matrix(axis ax, float angle) {
+	float c = cos(angle);
+	float s = sin(angle);
+
+	switch(ax) {
+		case X:
+			return (matrix3) {{
+				{ 1,  0,   0},
+				{ 0,  c,  -s},
+				{ 0,  s,   c}
+			}};
+		case Y:
+			return (matrix3) {{
+				{ c,  0,  s},
+				{ 0,  1,  0},
+				{-s,  0,  c}
+			}};
+		case Z:
+			return (matrix3) {{
+				{ c, -s,  0},
+				{ s,  c,  0},
+				{ 0,  0,  1}
+			}};
+		default:
+			return (matrix3){0};
+	}
+}
+</code></pre>
+<p>Quindi, è bastato definire una semplice mesh direttamente in Desmos, trasformarla con la matrice di rotazione su Z, e proiettare.</p>
+<p>La stessa cosa è quella che facciamo in codice C nell'applicazione:</p>
+<pre><code class="language-c">void render_obj(const object* obj) {
+	if(obj-&gt;mesh == NULL) return;
+
+    // array di vertici proiettati
+	vector3* proj_verts = malloc(sizeof(vector3) * obj-&gt;mesh-&gt;n_verts);
+
+    // itera su tutti i vertici
+	for(int v = 0; v &lt; obj-&gt;mesh-&gt;n_verts; v++) {
+        // trasforma vertice
+		vector3 vert = obj-&gt;mesh-&gt;verts[v];
+		vert = transform(vert, obj-&gt;point, obj-&gt;euler, obj-&gt;scale);
+	
+        // proietta vertice e memoriza
+		vector3 proj = project(vert);
+		proj_verts[v] = proj;
+	}
+
+    // disegna triangoli
+	for(int t = 0; t &lt; obj-&gt;mesh-&gt;n_tris; t++) {
+		// get triangle
+		triangle tri = obj-&gt;mesh-&gt;tris[t];
+        line(
+			proj_verts[tri.a].x, proj_verts[tri.a].y,
+			proj_verts[tri.b].x, proj_verts[tri.b].y,
+			obj-&gt;col
+		);
+	    line(
+			proj_verts[tri.b].x, proj_verts[tri.b].y,
+			proj_verts[tri.c].x, proj_verts[tri.c].y,
+			obj-&gt;col
+		);
+		line(
+			proj_verts[tri.a].x, proj_verts[tri.a].y,
+			proj_verts[tri.c].x, proj_verts[tri.c].y,
+			obj-&gt;col
+		);
+	}
+
+    // libera array di vertici proiettati 
+	free(proj_verts);
+}
+</code></pre>
+<p>Per disegnare i triangoli, facciamo semplicemente uso della funzione <code>line()</code> chiamata su tutte le coppie di vertici che formano i triangoli, come definito dalla mesh.</p>
+<p>La <code>project()</code> equivale a come l'abbiamo vista in Desmos:</p>
+<pre><code class="language-c">vector3 project(vector3 vert) {
+    // trasla nello spazio della telecamera
+    vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
+	d = rotate(d, vec_by_sca(cam.euler, -1));
+
+    if (d.z &lt;= 0.01f) // salta
+
+    // formule di proiezione
+	float proj_x = (cam.focal * d.x) / d.z;
+	float proj_y = (cam.focal * d.y) / d.z;
+
+    // scala sullo schermo
+	float screen_x = WIDTH  * 0.5f + proj_x;
+    float screen_y = HEIGHT * 0.5f - proj_y;
+
+	return (vector3){screen_x, screen_y, 0};
+}
+</code></pre>
+<p>cioè prima dobbiamo riportarci allo spazio della telecamera (essenzialmente applicare la posizione della telecamera e la sua rotazione).
+Quindi si possono applicare le formule di proiezione, con una leggera complicazione data dal fatto che dobbiamo riportare tutto nello spazio di coordinate dello schermo.</p>
+<p>La <code>transform()</code> è invece l'applicazione di alcune funzioncine di algebra lineare:</p>
+<pre><code class="language-c">vector3 transform(vector3 vert, vector3 point, vector3 euler, vector3 scale) {
+	vert = vec_by_vec(vert, scale); // scala  (moltiplicazione membro a membro)
+	vert = rotate(vert, euler);     // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
+	vert = vec_pl_vec(vert, point); // trasla (addizione vettoriale)
+	return vert;
+}
+</code></pre>
+<p>La <code>rotate()</code>, come notato dai commenti, consiste in 3 moltiplicazioni matriciali, una per ciascuna matrice di rotazione Z, Y e X:</p>
+<pre><code class="language-c">vector3 rotate(vector3 v, vector3 euler) {
+	v = mat_by_vec(rot_matrix(Z, euler.z), v);
+	v = mat_by_vec(rot_matrix(Y, euler.y), v);
+	v = mat_by_vec(rot_matrix(X, euler.x), v);
+
+	return v;
+}
+</code></pre>
+<p>Il risultato di tutto questo codice è che, con le mesh giuste e una scena appositamente configurata, si possono renderizzare dei semplici wireframe:</p>
+<p><img src="/pics/blog/render0_rendering.png" alt="scacchiera" /></p>
+<p>Una scacchiera!</p>
+<p>Ci sono tante cose che non sono state discusse qui (di base il clipping, poi funzioni avanzate come le texture, i materiali, ecc...).
+Chiaramente, oggi come oggi non ha particolare significato reimplementare tutto da 0 in software, sopratutto quando esistono API come OpenGL che permettono di fare tutto, in hardware, e meglio.
+Infatti, in altri articoli spero di poter parlare di OpenGL e presentare una piccola demo.
+In ogni caso, spero che quanto visto qui possa essere stato utile o almeno interessante.
+Cheers!</p>
+</main>
+<footer>
+	<div class="badges">
+		<a href="https://archlinux.org/"><img src="/art/badges/arch.gif" alt="arch" title="i use arch btw" height=31 width=88/></a>
+		<a href="https://github.com/"><img src="/art/badges/github.gif" alt="github" title="hosted on github pages" height=31 width=88/></a>
+		<a href="https://neovim.io/"><img src="/art/badges/neovim.gif" alt="neovim" title="fully written with riced neovim" height=31 width=88/></a>
+		<a href="https://www.python.org/"><img src="/art/badges/python.png" alt="python" title="static pages served by python" height=31 width=88/></a>
+	</div>
+	<p>Luca Seggiani - 2026</p>
+</footer>
+</body>
