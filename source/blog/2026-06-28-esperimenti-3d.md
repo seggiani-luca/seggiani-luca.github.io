@@ -22,25 +22,25 @@ Il risultato è una cosa del genere:
 ```c
 // buffer.h
 
-// gets called once at the start of runtime 
+// chiamata a inizio ruintime 
 void init();
 
-// gets called once at the end of runtime 
+// chiamata a fine runtime 
 void destroy();
 
-// gets called for each frame
+// chiamata ad ogni frame
 void update(float delta);
 
-// typedef for colors
+// typedef per i colori
 typedef uint32_t color;
 
-// gets a single SDL color out of RGB components
+// ottiene un singolo colore SDL dalle componenti RGB
 color rgb(uint8_t r, uint8_t g, uint8_t b);
 
-// plots a pixel on the screen
+// mette un pixel a schermo
 void pixel(int x, int y, color col);
 
-// plots a line on the screen
+// mette una riga a schermo
 void line(int x0, int y0, int x1, int y1, color col);
 ```
 
@@ -52,7 +52,6 @@ Non starò a dilungarmi sulla teoria (c'è un ottima spiegazione [qui](https://w
 L’idea è discretizzare una retta scegliendo l’asse dominante (x o y), cioè la direzione in cui avanzare a ogni step.
 Durante l’avanzamento si accumula un errore rispetto alla retta ideale; quando questo supera 0.5, si incrementa anche la coordinata sull’asse secondario.
 
-
 A questo punto dobbiamo:
 1. Importare delle *mesh*, cioè degli insiemi di triangoli che rappresentano gli oggetti che vogliamo renderizzare a schermo;
 2. Definire delle *scene*, cioè collezioni di mesh disposte nello spazio;
@@ -60,14 +59,14 @@ A questo punto dobbiamo:
 
 ## Mesh
 
-Per il punto 1. ho deciso di importare il formato [Wavefront `.obj`](https://en.wikipedia.org/wiki/Wavefront_.obj_file) in quanto è semplice e in formato testo.
+Per il punto 1. ho deciso di importare il formato [Wavefront `.obj`](https://en.wikipedia.org/wiki/Wavefront_.obj_file) in quanto è semplice e testuale. 
 Blender, con un po' di configurazione, permette di generare file `.obj` molto semplici:
 
 ![preset blender](/pics/blog/render0_blender_preset.png)
 
 Configurazione exporter Blender
 
-La cui struttura testuale è:
+La struttura di questi file è la seguente:
 ```obj
 # vertici
 v -6.000000 0.000000 8.000000
@@ -85,8 +84,10 @@ f 9 11 8
 Tutte le informazioni in un file `.obj` sono rappresentate da buffer.
 Il primo buffer (sempre presente) è quello dei vertici, rappresentati dal carattere `v` e 3 numeri in virgola mobile (le coordinate del vertice).
 In file più complessi ci sono poi i buffer delle normali e delle coordinate UV (di cui forse parlerò in seguito).
-In fondo c'è sempre un buffer di facce, che altro non sono che triple di puntatori ai buffer definiti prima.
-Ad esempio, in questo caso banale dove c'è solo il buffer di vertici, una faccia è data da 3 indici, che indicizzano appunto i vertici nel buffer.
+In fondo c'è sempre un buffer di facce (triangoli), che altro non sono che triple di puntatori ai buffer definiti prima.
+
+Abbiamo che in questo caso banale c'è solo il buffer di vertici.
+Quindi una faccia sarà data da 3 indici, che indicizzano appunto i vertici del triangolo nel buffer.
 
 Per rappresentare una mesh in memoria ci dotiamo quindi dei seguenti struct:
 ```c
@@ -127,7 +128,7 @@ typedef struct {
 static mesh_cache_entry mesh_cache[MESH_CACHE_LEN];
 ```
 e definendo una funzione che importi le mesh, solo dopo aver controllato di non averle già in cache.
-In pseudocodice:
+In pseudocodice C:
 ```c
 mesh* import_mesh(const char* path) {
 	// cerca nella cache 
@@ -135,19 +136,19 @@ mesh* import_mesh(const char* path) {
 		mesh_cache_entry* entry = &mesh_cache[i];
 
 		if(entry->mesh != NULL && strcmp(entry->path, path) == 0) { // match su percorso
-			entry->mesh->refs++; // conta
-			return entry->mesh;  // restituisci
+			entry->mesh->refs++; // conta riferimenti
+			return entry->mesh;  // restituisci riferimenti
 		}
 	}
 
-    // carica mesh da file
-    [...]
+	// carica mesh da file
+	[...] -> verts, n_verts, tris, n_tris
 	
-    // alloca mesh
+	// alloca mesh
 	mesh* m = malloc(sizeof(mesh));
 	*m = (mesh){verts, n_verts, tris, n_tris, 1};
 
-    // registra mesh nella cache
+	// registra mesh nella cache
 	for(int i = 0; i < MESH_CACHE_LEN; i++) {
 		mesh_cache_entry* entry = &mesh_cache[i];
 
@@ -233,9 +234,11 @@ Non bisogna essere fotografi per capire il ruolo della lunghezza focale.
 L'idea è di considerare una [camera oscura](https://it.wikipedia.org/wiki/Camera_oscura), cioè una scatola con un foro che lascia passare la luce.
 Dal punto di vista matematico, il foro è infinitamente piccolo e della scatola ci interessa solo la parete opposta al foro.
 Questa parete sarà la superficie su cui comparirà la proiezione bidimensionale del mondo tridimensionale che sta dall'altra parte del foro.
+La lunghezza focale non è altro che la distanza fra il foro e la parete della camera oscura!
 
 Questa situazione è modellizzata in 2D nel seguente Desmos (metà del motivo di questa spiegazione era provare ad includere i grafici Desmos nella pagina).
-Si possono spostare i punti P1, P2 e P3, e vedere come viene aggiornata la proiezione sulla parete della camera oscura!
+Si possono spostare i punti P1, P2 e P3, e vedere come viene aggiornata la proiezione sulla parete della camera oscura.
+Si vede che aumentando la distanza focale, il "raggio" visivo, cioè la superficie che viene proiettata sulla parete, aumenta.
 
 <iframe src="https://www.desmos.com/calculator/6igulxk1ql" class="calc"></iframe>
 
@@ -287,30 +290,30 @@ La stessa cosa è quella che facciamo in codice C nell'applicazione:
 void render_obj(const object* obj) {
 	if(obj->mesh == NULL) return;
 
-    // array di vertici proiettati
+	// array di vertici proiettati
 	vector3* proj_verts = malloc(sizeof(vector3) * obj->mesh->n_verts);
 
-    // itera su tutti i vertici
+	// itera su tutti i vertici
 	for(int v = 0; v < obj->mesh->n_verts; v++) {
-        // trasforma vertice
+		// trasforma vertice
 		vector3 vert = obj->mesh->verts[v];
 		vert = transform(vert, obj->point, obj->euler, obj->scale);
 	
-        // proietta vertice e memoriza
+		// proietta vertice e memoriza
 		vector3 proj = project(vert);
 		proj_verts[v] = proj;
 	}
 
-    // disegna triangoli
+	// disegna triangoli
 	for(int t = 0; t < obj->mesh->n_tris; t++) {
 		// get triangle
 		triangle tri = obj->mesh->tris[t];
-        line(
+		line(
 			proj_verts[tri.a].x, proj_verts[tri.a].y,
 			proj_verts[tri.b].x, proj_verts[tri.b].y,
 			obj->col
 		);
-	    line(
+		line(
 			proj_verts[tri.b].x, proj_verts[tri.b].y,
 			proj_verts[tri.c].x, proj_verts[tri.c].y,
 			obj->col
@@ -322,7 +325,7 @@ void render_obj(const object* obj) {
 		);
 	}
 
-    // libera array di vertici proiettati 
+	// libera array di vertici proiettati 
 	free(proj_verts);
 }
 ```
@@ -332,19 +335,19 @@ Per disegnare i triangoli, facciamo semplicemente uso della funzione `line()` ch
 La `project()` equivale a come l'abbiamo vista in Desmos:
 ```c
 vector3 project(vector3 vert) {
-    // trasla nello spazio della telecamera
-    vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
+	// trasla nello spazio della telecamera
+	vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
 	d = rotate(d, vec_by_sca(cam.euler, -1));
 
-    if (d.z <= 0.01f) // salta
+	if (d.z <= 0.01f) // salta
 
-    // formule di proiezione
+	// formule di proiezione
 	float proj_x = (cam.focal * d.x) / d.z;
 	float proj_y = (cam.focal * d.y) / d.z;
 
-    // scala sullo schermo
+	// scala sullo schermo
 	float screen_x = WIDTH  * 0.5f + proj_x;
-    float screen_y = HEIGHT * 0.5f - proj_y;
+	float screen_y = HEIGHT * 0.5f - proj_y;
 
 	return (vector3){screen_x, screen_y, 0};
 }

@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="/css/styles.css">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- prism -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>Prism.plugins.autoloader.languages_path ="https://cdn.jsdelivr.net/npm/prismjs/components/";</script>
 </head>
 <body>
 <header>
@@ -28,7 +33,7 @@
 <h2>Algoritmo WFC</h2>
 <p>L'algoritmo WFC (descritto per la prima volta <a href="https://github.com/mxgmn/WaveFunctionCollapse">qui</a>) popola una griglia NxN in maniera procedurale usando un processo ispirato dal <a href="https://it.wikipedia.org/wiki/Collasso_della_funzione_d%27onda">collasso della funzione d'onda</a> in meccanica quantistica. Si assume la griglia come composta da <em>caselle</em>, e si determina una serie di <em>regole di adiacenza</em> che specificano quali caselle possono essere disposte di fianco ad altre.</p>
 <p>Vediamo innanzitutto come queste regole di adiacenza vengono definite nel codice. Per ogni casella si avrà:</p>
-<pre><code class="language-C#">class Tile {
+<pre><code class="language-csharp">class Tile {
 	// number of layers this tile defines adjacency rules for
 	[Min(1)]
 	public int layers = 1;
@@ -55,7 +60,7 @@
 <ol>
 <li>
 <p>Si inizializza una griglia NxN di caselle. Ad ogni casella si associa un insieme di stati possibili, e una funzione del numero di stati che rappresenta l'<em>entropia</em> di tale casella. L'entropia dovrà essere monotona crescente col numero di stati possibili. Nel codice la implementiamo come segue:</p>
-<pre><code class="language-C#">// entropy of the tile set
+<pre><code class="language-csharp">// entropy of the tile set
 public float getEntropy()
 {
 	// entropy depedends on number of valid instances
@@ -77,7 +82,7 @@ public float getEntropy()
 </li>
 <li>
 <p>Si sceglie una casella a caso e si <em>collassa</em>, cioè si sceglie uno a caso fra gli stati possibili e si seleziona come l'unico valido per tale casella. Quindi, questo collassamento viene propagato alle caselle vicine, eliminando in queste gli stati che non sono più validi a seguito del collassamento. Il codice di collassamento di una casella si presenta come segue:</p>
-<pre><code class="language-C#">// collapse one tile at a certain coordinate
+<pre><code class="language-csharp">// collapse one tile at a certain coordinate
 private void collapseTile(int r, int c)
 {
 	// get tile set at coordinate
@@ -122,7 +127,7 @@ private void collapseTile(int r, int c)
 </li>
 </ol>
 <p>In codice, questo si traduce in una routine di generazione del tipo:</p>
-<pre><code class="language-C#">void generate() {
+<pre><code class="language-csharp">void generate() {
 	// initialize grid
 	initGrid();
 
@@ -198,7 +203,7 @@ private void collapseTile(int r, int c)
 </ul>
 <p>Questa configurazione permette quindi sia un semplice <em>authoring</em> delle caselle che una semplice implementazione dell'algoritmo WFC. Come abbiamo visto, l'authoring si fa via interfaccia grafica.</p>
 <p>Quindi, la trasformazione dei <code>TileStack</code> in <code>TileSet</code> si fa in maniera ricorsiva con backtracking considerando tutte le possibili combinazioni di stati ad ogni livello. Per questo è predisposta una funzione:</p>
-<pre><code class="language-C#">// performs a recursive step to get the combinations from a tile stack
+<pre><code class="language-csharp">// performs a recursive step to get the combinations from a tile stack
 private static void populateTileSet(
 	TileStack.TileList[] lists,           // tile lists
 	int depth,                            // depth of the current step
@@ -237,7 +242,7 @@ private static void populateTileSet(
 }
 </code></pre>
 <p>A questo punto la logica dell'algoritmo WFC è semplice. Ad esempio, per restringere una <code>TileSet</code> ai soli stati concessi da un adiacenza in una data direzione, basta controllare tutti i casi precalcolati:</p>
-<pre><code class="language-C#">// collapse tile set to tiles that satisfy given adjacency in direction
+<pre><code class="language-csharp">// collapse tile set to tiles that satisfy given adjacency in direction
 public bool restrict(
 	Tile.Adjacency[] baseAdjacencies, // requested adjacency 
 	Tile.Adjacency direction)         // in which direction
@@ -286,7 +291,7 @@ public bool restrict(
 <p>Insieme di edifici modellati</p>
 <p>Oltre a questi modelli, sono stati poi realizzati altri dettagli minori (da sovrapporre sulle caselle popolate da edifici), come ad esempio lampioni, vegetazione, ecc... Questi vengono sempre distribuiti in maniera proceduale in zone appropiate (lampioni a bordo strada, vegetazione nei parchi, ecc...).</p>
 <p>Anche per gli edifici si sono fatte delle considerazioni riguardo alla modalità della generazione. Ad esempio, per realizzare la divisione fra diverse regioni si è usato un approccio basato sul <a href="https://en.wikipedia.org/wiki/Perlin_noise">rumore di Perlin</a>. Sostanzialmente, per ogni casella viene calcolato un rumore casuale campionato dal rumore di Perlin (che è spazialmente corente e porta a regioni distinte). Questo va ad indicizzare una delle regioni possibili (e quindi di tipologie di edificio possibili). In codice:</p>
-<pre><code class="language-C#">// sample perlin noise
+<pre><code class="language-csharp">// sample perlin noise
 float noise = Mathf.PerlinNoise(
 	origin.position.x \* zoneFrequency + i \* zoneFrequency + noiseOffset,
 	origin.position.z \* zoneFrequency + i \* zoneFrequency + noiseOffset

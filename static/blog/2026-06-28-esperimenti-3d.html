@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="/css/styles.css">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- prism -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>Prism.plugins.autoloader.languages_path ="https://cdn.jsdelivr.net/npm/prismjs/components/";</script>
 </head>
 <body>
 <header>
@@ -39,25 +44,25 @@ Più che altro lo allego a scopo sperimentale e didattico.</p>
 Il risultato è una cosa del genere:</p>
 <pre><code class="language-c">// buffer.h
 
-// gets called once at the start of runtime 
+// chiamata a inizio ruintime 
 void init();
 
-// gets called once at the end of runtime 
+// chiamata a fine runtime 
 void destroy();
 
-// gets called for each frame
+// chiamata ad ogni frame
 void update(float delta);
 
-// typedef for colors
+// typedef per i colori
 typedef uint32_t color;
 
-// gets a single SDL color out of RGB components
+// ottiene un singolo colore SDL dalle componenti RGB
 color rgb(uint8_t r, uint8_t g, uint8_t b);
 
-// plots a pixel on the screen
+// mette un pixel a schermo
 void pixel(int x, int y, color col);
 
-// plots a line on the screen
+// mette una riga a schermo
 void line(int x0, int y0, int x1, int y1, color col);
 </code></pre>
 <p>L'implementazione di questi è banale (per la SDL ci sono ottimi tutorial come <a href="https://lazyfoo.net/tutorials/SDL/">questi</a>).
@@ -73,11 +78,11 @@ Durante l’avanzamento si accumula un errore rispetto alla retta ideale; quando
 <li>Fare un po' di algebra lineare per ricavare la posizione dei punti delle mesh sullo schermo, in relazione ad una certa <em>telecamera</em> virtuale.</li>
 </ol>
 <h2>Mesh</h2>
-<p>Per il punto 1. ho deciso di importare il formato <a href="https://en.wikipedia.org/wiki/Wavefront_.obj_file">Wavefront <code>.obj</code></a> in quanto è semplice e in formato testo.
+<p>Per il punto 1. ho deciso di importare il formato <a href="https://en.wikipedia.org/wiki/Wavefront_.obj_file">Wavefront <code>.obj</code></a> in quanto è semplice e testuale.
 Blender, con un po' di configurazione, permette di generare file <code>.obj</code> molto semplici:</p>
 <p><img src="/pics/blog/render0_blender_preset.png" alt="preset blender" /></p>
 <p>Configurazione exporter Blender</p>
-<p>La cui struttura testuale è:</p>
+<p>La struttura di questi file è la seguente:</p>
 <pre><code class="language-obj"># vertici
 v -6.000000 0.000000 8.000000
 v -4.000000 0.000000 8.000000
@@ -93,8 +98,9 @@ f 9 11 8
 <p>Tutte le informazioni in un file <code>.obj</code> sono rappresentate da buffer.
 Il primo buffer (sempre presente) è quello dei vertici, rappresentati dal carattere <code>v</code> e 3 numeri in virgola mobile (le coordinate del vertice).
 In file più complessi ci sono poi i buffer delle normali e delle coordinate UV (di cui forse parlerò in seguito).
-In fondo c'è sempre un buffer di facce, che altro non sono che triple di puntatori ai buffer definiti prima.
-Ad esempio, in questo caso banale dove c'è solo il buffer di vertici, una faccia è data da 3 indici, che indicizzano appunto i vertici nel buffer.</p>
+In fondo c'è sempre un buffer di facce (triangoli), che altro non sono che triple di puntatori ai buffer definiti prima.</p>
+<p>Abbiamo che in questo caso banale c'è solo il buffer di vertici.
+Quindi una faccia sarà data da 3 indici, che indicizzano appunto i vertici del triangolo nel buffer.</p>
 <p>Per rappresentare una mesh in memoria ci dotiamo quindi dei seguenti struct:</p>
 <pre><code class="language-c">typedef struct {
 	int a;
@@ -130,26 +136,26 @@ Da lì in poi, per accedere alla stessa mesh basta ottenere lo stesso puntatore,
 static mesh_cache_entry mesh_cache[MESH_CACHE_LEN];
 </code></pre>
 <p>e definendo una funzione che importi le mesh, solo dopo aver controllato di non averle già in cache.
-In pseudocodice:</p>
+In pseudocodice C:</p>
 <pre><code class="language-c">mesh* import_mesh(const char* path) {
 	// cerca nella cache 
 	for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
 		mesh_cache_entry* entry = &amp;mesh_cache[i];
 
 		if(entry-&gt;mesh != NULL &amp;&amp; strcmp(entry-&gt;path, path) == 0) { // match su percorso
-			entry-&gt;mesh-&gt;refs++; // conta
-			return entry-&gt;mesh;  // restituisci
+			entry-&gt;mesh-&gt;refs++; // conta riferimenti
+			return entry-&gt;mesh;  // restituisci riferimenti
 		}
 	}
 
-    // carica mesh da file
-    [...]
+	// carica mesh da file
+	[...] -&gt; verts, n_verts, tris, n_tris
 	
-    // alloca mesh
+	// alloca mesh
 	mesh* m = malloc(sizeof(mesh));
 	*m = (mesh){verts, n_verts, tris, n_tris, 1};
 
-    // registra mesh nella cache
+	// registra mesh nella cache
 	for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
 		mesh_cache_entry* entry = &amp;mesh_cache[i];
 
@@ -220,9 +226,11 @@ Infine, <code>focal</code> è la lunghezza focale.</p>
 <p>Non bisogna essere fotografi per capire il ruolo della lunghezza focale.
 L'idea è di considerare una <a href="https://it.wikipedia.org/wiki/Camera_oscura">camera oscura</a>, cioè una scatola con un foro che lascia passare la luce.
 Dal punto di vista matematico, il foro è infinitamente piccolo e della scatola ci interessa solo la parete opposta al foro.
-Questa parete sarà la superficie su cui comparirà la proiezione bidimensionale del mondo tridimensionale che sta dall'altra parte del foro.</p>
+Questa parete sarà la superficie su cui comparirà la proiezione bidimensionale del mondo tridimensionale che sta dall'altra parte del foro.
+La lunghezza focale non è altro che la distanza fra il foro e la parete della camera oscura!</p>
 <p>Questa situazione è modellizzata in 2D nel seguente Desmos (metà del motivo di questa spiegazione era provare ad includere i grafici Desmos nella pagina).
-Si possono spostare i punti P1, P2 e P3, e vedere come viene aggiornata la proiezione sulla parete della camera oscura!</p>
+Si possono spostare i punti P1, P2 e P3, e vedere come viene aggiornata la proiezione sulla parete della camera oscura.
+Si vede che aumentando la distanza focale, il &quot;raggio&quot; visivo, cioè la superficie che viene proiettata sulla parete, aumenta.</p>
 <iframe src="https://www.desmos.com/calculator/6igulxk1ql" class="calc"></iframe>
 <p>Camera oscura in 2D</p>
 <p>La stessa cosa si ripete in 3D, per cui possiamo fare cose più sofisticate come nel seguente Desmos:</p>
@@ -263,30 +271,30 @@ Per le matrici di rotazione (che ci torneranno utili a breve) rimando a quanto s
 <pre><code class="language-c">void render_obj(const object* obj) {
 	if(obj-&gt;mesh == NULL) return;
 
-    // array di vertici proiettati
+	// array di vertici proiettati
 	vector3* proj_verts = malloc(sizeof(vector3) * obj-&gt;mesh-&gt;n_verts);
 
-    // itera su tutti i vertici
+	// itera su tutti i vertici
 	for(int v = 0; v &lt; obj-&gt;mesh-&gt;n_verts; v++) {
-        // trasforma vertice
+		// trasforma vertice
 		vector3 vert = obj-&gt;mesh-&gt;verts[v];
 		vert = transform(vert, obj-&gt;point, obj-&gt;euler, obj-&gt;scale);
 	
-        // proietta vertice e memoriza
+		// proietta vertice e memoriza
 		vector3 proj = project(vert);
 		proj_verts[v] = proj;
 	}
 
-    // disegna triangoli
+	// disegna triangoli
 	for(int t = 0; t &lt; obj-&gt;mesh-&gt;n_tris; t++) {
 		// get triangle
 		triangle tri = obj-&gt;mesh-&gt;tris[t];
-        line(
+		line(
 			proj_verts[tri.a].x, proj_verts[tri.a].y,
 			proj_verts[tri.b].x, proj_verts[tri.b].y,
 			obj-&gt;col
 		);
-	    line(
+		line(
 			proj_verts[tri.b].x, proj_verts[tri.b].y,
 			proj_verts[tri.c].x, proj_verts[tri.c].y,
 			obj-&gt;col
@@ -298,26 +306,26 @@ Per le matrici di rotazione (che ci torneranno utili a breve) rimando a quanto s
 		);
 	}
 
-    // libera array di vertici proiettati 
+	// libera array di vertici proiettati 
 	free(proj_verts);
 }
 </code></pre>
 <p>Per disegnare i triangoli, facciamo semplicemente uso della funzione <code>line()</code> chiamata su tutte le coppie di vertici che formano i triangoli, come definito dalla mesh.</p>
 <p>La <code>project()</code> equivale a come l'abbiamo vista in Desmos:</p>
 <pre><code class="language-c">vector3 project(vector3 vert) {
-    // trasla nello spazio della telecamera
-    vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
+	// trasla nello spazio della telecamera
+	vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
 	d = rotate(d, vec_by_sca(cam.euler, -1));
 
-    if (d.z &lt;= 0.01f) // salta
+	if (d.z &lt;= 0.01f) // salta
 
-    // formule di proiezione
+	// formule di proiezione
 	float proj_x = (cam.focal * d.x) / d.z;
 	float proj_y = (cam.focal * d.y) / d.z;
 
-    // scala sullo schermo
+	// scala sullo schermo
 	float screen_x = WIDTH  * 0.5f + proj_x;
-    float screen_y = HEIGHT * 0.5f - proj_y;
+	float screen_y = HEIGHT * 0.5f - proj_y;
 
 	return (vector3){screen_x, screen_y, 0};
 }

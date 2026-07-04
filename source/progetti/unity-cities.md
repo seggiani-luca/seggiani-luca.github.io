@@ -14,7 +14,7 @@ L'algoritmo WFC (descritto per la prima volta [qui](https://github.com/mxgmn/Wav
 
 Vediamo innanzitutto come queste regole di adiacenza vengono definite nel codice. Per ogni casella si avrà:
 
-```C#
+```csharp
 class Tile {
 	// number of layers this tile defines adjacency rules for
 	[Min(1)]
@@ -44,7 +44,7 @@ Lo svolgimento dell'algoritmo, quindi, è sintetizzato grossomodo nei seguenti p
 
 1.  Si inizializza una griglia NxN di caselle. Ad ogni casella si associa un insieme di stati possibili, e una funzione del numero di stati che rappresenta l'_entropia_ di tale casella. L'entropia dovrà essere monotona crescente col numero di stati possibili. Nel codice la implementiamo come segue:
     
-    ```C#    
+    ```csharp    
     // entropy of the tile set
     public float getEntropy()
     {
@@ -67,7 +67,7 @@ Lo svolgimento dell'algoritmo, quindi, è sintetizzato grossomodo nei seguenti p
     dove notiamo il valore infinito fa da "sentinella" per le caselle già collassate (con un solo numero o meno di stati validi possibili);
 2.  Si sceglie una casella a caso e si _collassa_, cioè si sceglie uno a caso fra gli stati possibili e si seleziona come l'unico valido per tale casella. Quindi, questo collassamento viene propagato alle caselle vicine, eliminando in queste gli stati che non sono più validi a seguito del collassamento. Il codice di collassamento di una casella si presenta come segue:
     
-    ```C#
+    ```csharp
     // collapse one tile at a certain coordinate
     private void collapseTile(int r, int c)
     {
@@ -110,7 +110,7 @@ Lo svolgimento dell'algoritmo, quindi, è sintetizzato grossomodo nei seguenti p
 
 In codice, questo si traduce in una routine di generazione del tipo:
 
-```C#
+```csharp
 void generate() {
 	// initialize grid
 	initGrid();
@@ -201,7 +201,7 @@ Questa configurazione permette quindi sia un semplice _authoring_ delle caselle 
 
 Quindi, la trasformazione dei `TileStack` in `TileSet` si fa in maniera ricorsiva con backtracking considerando tutte le possibili combinazioni di stati ad ogni livello. Per questo è predisposta una funzione:
 
-```C#
+```csharp
 // performs a recursive step to get the combinations from a tile stack
 private static void populateTileSet(
 	TileStack.TileList[] lists,           // tile lists
@@ -243,7 +243,7 @@ private static void populateTileSet(
 
 A questo punto la logica dell'algoritmo WFC è semplice. Ad esempio, per restringere una `TileSet` ai soli stati concessi da un adiacenza in una data direzione, basta controllare tutti i casi precalcolati:
 
-```C#
+```csharp
 // collapse tile set to tiles that satisfy given adjacency in direction
 public bool restrict(
 	Tile.Adjacency[] baseAdjacencies, // requested adjacency 
@@ -301,7 +301,7 @@ Oltre a questi modelli, sono stati poi realizzati altri dettagli minori (da sovr
 
 Anche per gli edifici si sono fatte delle considerazioni riguardo alla modalità della generazione. Ad esempio, per realizzare la divisione fra diverse regioni si è usato un approccio basato sul [rumore di Perlin](https://en.wikipedia.org/wiki/Perlin_noise). Sostanzialmente, per ogni casella viene calcolato un rumore casuale campionato dal rumore di Perlin (che è spazialmente corente e porta a regioni distinte). Questo va ad indicizzare una delle regioni possibili (e quindi di tipologie di edificio possibili). In codice:
 
-```C#
+```csharp
 // sample perlin noise
 float noise = Mathf.PerlinNoise(
 	origin.position.x \* zoneFrequency + i \* zoneFrequency + noiseOffset,

@@ -32,7 +32,6 @@ body {
     color: var(--fg);
 	
 	font-family: var(--sans);
-	font-size: 90%;
 	
 	max-width: 800px;
 }
@@ -60,6 +59,7 @@ header img {
 nav ul {
 	margin-top: 0;
 	padding-left: 0;
+	margin-bottom: 10px;
 
 	background-color: var(--header-bg);
 	border: solid 1px var(--link);
@@ -72,21 +72,23 @@ nav ul {
 	gap: 10px;
 }
 
+nav ul li {
+	margin: 0;
+}
+
 /* main */
 
 main {
+	padding-bottom: 10px;
+
 	background-color: var(--table-bg);
 	border: solid 5px var(--header-bg);
 	border-top: none;
 }
 
 p {
-	padding: 5px;
-	padding-left: 10px;
-	padding-right: 10px;
-	
 	margin-top: 0;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 }
 
 a {
@@ -104,7 +106,7 @@ h1, h2, h3 {
 	padding-left: 10px;
 	padding-right: 10px;
 	
-	margin-top: 0;
+	margin-top: 20px;
 	margin-bottom: 5px;
 	
 	background:
@@ -117,6 +119,10 @@ h1, h2, h3 {
 	font-family: var(--sans);
 	text-transform: lowercase;
 	font-size: 18px;
+}
+
+h3 {
+	font-size: 16px;
 }
 
 h1 {
@@ -143,12 +149,25 @@ p img {
 }
 
 pre {
-	padding: 5px;
+	padding: 10px;
 	
 	white-space: pre-wrap;
 	overflow-wrap: break-word;
 	
 	background-color: var(--code-bg);
+}
+
+ul, ol {
+	margin: 0;
+}
+
+li {
+	margin-bottom: 5px;
+}
+
+li, p {
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 /* footer */
@@ -171,4 +190,24 @@ footer {
 
 .badges a img {
 	image-rendering: pixelated;
+}
+
+/* code */
+
+.keyword {
+	color: pink;
+	font-weight: bold;
+}
+
+.function {
+	color: cyan;
+}
+
+.string {
+	color: lightgreen;
+}
+
+.comment {
+	color: lightgray;
+	font-style: italic;
 }
