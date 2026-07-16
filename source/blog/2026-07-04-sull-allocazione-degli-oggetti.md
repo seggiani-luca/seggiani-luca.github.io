@@ -122,7 +122,7 @@ Il codice si spiega meglio delle parole:
 ```c
 // vtabe dei metodi di accesso ai campi 
 typedef struct {
-    // metodo di lettura 
+	// metodo di lettura 
 	void (*read)(const field* f, void* dst);
 
 	// metodo di scrittura 
@@ -131,10 +131,10 @@ typedef struct {
 	// metodo di stampa 
 	void (*print)(const field* f);
 	
-    // metodo di serializzazione 
+	// metodo di serializzazione 
 	void (*serialize)(const field* f, char* buf);
-    
-    // metodo di deserializzazione 
+	
+	// metodo di deserializzazione 
 	field* (*deserialize)(const char* buf);
 
 	// metodo di rendering sull'interfaccia 
@@ -145,10 +145,10 @@ typedef struct {
 struct field {
 	char name[ENT_NAME_SIZ];
 
-    // vtable dei metodi di accesso
+	// vtable dei metodi di accesso
 	fieldVtable* vtable;
 
-    // è una lista, quindi prossimo
+	// è una lista, quindi prossimo
 	field* next;
 };
 
@@ -156,11 +156,11 @@ struct field {
 struct entity {
 	char name[ENT_NAME_SIZ];
 
-    // radice della lista di campi
+	// radice della lista di campi
 	field* root;
 
 
-    // gerarchia
+	// gerarchia
 	struct entity* parent;
 	struct entity* child;
 	struct entity* peer;
@@ -185,7 +185,7 @@ Sempre in codice, vediamo il campo `int`, cioè il semplice tipo intero:
 typedef struct {
 	field base;
 
-    // dati, cioè l'int stessa
+	// dati, cioè l'int stessa
 	int val;
 } intField;
 
@@ -210,10 +210,10 @@ void intFieldPrint(const field* f) {
 }
 
 fieldVtable intFieldVtable = { 
-    .read  = intRead,          
-    .write = intWrite,         
-    .print = intFieldPrint,    
-    .gui   = intFieldGui,      
+	.read  = intRead,		  
+	.write = intWrite,		 
+	.print = intFieldPrint,	
+	.gui   = intFieldGui,	  
 };
 
 field* intNew(const char* name) {
@@ -293,14 +293,14 @@ typedef struct {
 } guiQueue;
 
 void updateGUI() {
-    guiQueue q = {0};
+	guiQueue q = {0};
 
-    // qui chiamiamo il codice utente
-    codice_utente(&q);
+	// qui chiamiamo il codice utente
+	codice_utente(&q);
 
-    // ora la guiQueue è popolata di rettangoli da disegnare!
-    // inviamo questi rettangoli alla GPU e disegnamoli
-    flushLayer(&q); // chiama codice specifico OpenGL
+	// ora la guiQueue è popolata di rettangoli da disegnare!
+	// inviamo questi rettangoli alla GPU e disegnamoli
+	flushLayer(&q); // chiama codice specifico OpenGL
 }
 ```
 

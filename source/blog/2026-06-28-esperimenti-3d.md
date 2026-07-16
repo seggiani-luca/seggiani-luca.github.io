@@ -98,15 +98,15 @@ typedef struct {
 } triangle;
 
 typedef struct  {
-    // array di vertici
+	// array di vertici
 	vector3* verts;
 	int n_verts;
 
-    // array di triangoli
+	// array di triangoli
 	triangle* tris;
 	int n_tris;
 
-    // numero di riferimenti
+	// numero di riferimenti
 	int refs;
 } mesh;
 ```
@@ -155,7 +155,7 @@ mesh* import_mesh(const char* path) {
 		if(entry->mesh == NULL) {
 			strncpy(entry->path, path, MESH_NAME_LEN - 1); // copia percorso
 			entry->path[MESH_NAME_LEN - 1] = '\0';
-			entry->mesh = m;                               // assegna mesh
+			entry->mesh = m;							   // assegna mesh
 			break;
 		}
 	}
@@ -360,7 +360,7 @@ La `transform()` è invece l'applicazione di alcune funzioncine di algebra linea
 ```c
 vector3 transform(vector3 vert, vector3 point, vector3 euler, vector3 scale) {
 	vert = vec_by_vec(vert, scale); // scala  (moltiplicazione membro a membro)
-	vert = rotate(vert, euler);     // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
+	vert = rotate(vert, euler);	 // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
 	vert = vec_pl_vec(vert, point); // trasla (addizione vettoriale)
 	return vert;
 }

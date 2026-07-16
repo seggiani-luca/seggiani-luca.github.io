@@ -54,7 +54,7 @@ Per aprire un contesto OpenGL e disegnare qualcosa abbiamo bisogno *almeno* degl
 Facciamo quindi zoom sulla fase di inizializzazione:
 ```c
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>          // GLFW: gestisce le finestre 
+#include <GLFW/glfw3.h>		  // GLFW: gestisce le finestre 
 #include "../../lib/glad/glad.h" // GLAD: carica le funzioni OpenGL
 
 GLFWwindow* window = NULL; // la finestra
@@ -154,34 +154,34 @@ typedef struct {
 Il puntatore `data` sarà di tipo `void` per puntare a qualsiasi `struct` rappresentante dati.
 Attraverso una serie di macro, quindi, si potranno generare le funzioni di accesso alla tabella di qualsiasi tipo di risorsa:
 ```c
-#define DATA_TABLE_DECL(Name, name)                                           \
-    void print##Name##Table();                                                \
-    name* import##Name(const char* path);                                     \
-    void free##Name(name* obj);                                               \
-    void destroy##Name##Table();
+#define DATA_TABLE_DECL(Name, name)										   \
+	void print##Name##Table();												\
+	name* import##Name(const char* path);									 \
+	void free##Name(name* obj);											   \
+	void destroy##Name##Table();
 ```
 
 Nell'implementazione, ciò che chiederemo di sviluppare (specifico alla risorsa) saranno solo le funzioni di caricamento e di liberazione della memoria dedicata alle risorse (le `d_import()` e `d_free()`).
 Potremo usare queste funzioni in un altra macro come:
 ```c
-#define DATA_TABLE_IMPL(Name, name)                                           \
-    dataRef name##_table[DATA_TABLE_SIZE] = {0};                              \
-                                                                              \
-    void print##Name##Table() {                                               \
-        printDataTable(name##_table, (void(*)(void*))print##Name);            \
-    }                                                                         \
-                                                                              \
-    name* import##Name(const char* path) {                                    \
-        return importData(path, name##_table, (void*(*)(FILE*))name##_import);\
-    }                                                                         \
-                                                                              \
-    void free##Name(name* data) {                                             \
-        freeData(data, name##_table, (void(*)(void*))name##_free);            \
-    }                                                                         \
-                                                                              \
-    void destroy##Name##Table() {                                             \
-        destroyTable(name##_table, (void(*)(void*))name##_free);              \
-    }                                                                         
+#define DATA_TABLE_IMPL(Name, name)										   \
+	dataRef name##_table[DATA_TABLE_SIZE] = {0};							  \
+																			  \
+	void print##Name##Table() {											   \
+		printDataTable(name##_table, (void(*)(void*))print##Name);			\
+	}																		 \
+																			  \
+	name* import##Name(const char* path) {									\
+		return importData(path, name##_table, (void*(*)(FILE*))name##_import);\
+	}																		 \
+																			  \
+	void free##Name(name* data) {											 \
+		freeData(data, name##_table, (void(*)(void*))name##_free);			\
+	}																		 \
+																			  \
+	void destroy##Name##Table() {											 \
+		destroyTable(name##_table, (void(*)(void*))name##_free);			  \
+	}																		 
 ```
 
 Il codice è un po' strano perché usa i nomi generici `Name` e `name` per la risorsa arbitraria.
@@ -297,53 +297,53 @@ Quindi, un'altro tipo di informazione di cui OpenGL ha bisogno sono gli *attribu
 Chiudiamo vedendo un po' di codice, che dovrebbe solidificare il tutto:
 ```c
 void generateGLMeshes(mesh* mesh) {
-    // genera VBO
-    glGenBuffers(1, &mesh->vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);    
-    glBufferData(
-        GL_ARRAY_BUFFER, 
-        mesh->n_verts * sizeof(vertex), 
-        mesh->verts,
-        GL_STATIC_DRAW
-    );
+	// genera VBO
+	glGenBuffers(1, &mesh->vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);	
+	glBufferData(
+		GL_ARRAY_BUFFER, 
+		mesh->n_verts * sizeof(vertex), 
+		mesh->verts,
+		GL_STATIC_DRAW
+	);
 
-    // genera VAO
-    glGenVertexArrays(1, &mesh->vao);
-    glBindVertexArray(mesh->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+	// genera VAO
+	glGenVertexArrays(1, &mesh->vao);
+	glBindVertexArray(mesh->vao);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 
-    // attributi delle posizioni di vertice
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(vertex),
-        (void*)0
-    );
-    glEnableVertexAttribArray(0);
-    
-    // attributi delle coordinate UV
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(vertex),
-        (void*)(3 * sizeof(float))
-    );
-    glEnableVertexAttribArray(1);
-    
-    // attributi dei vettori normali
-    glVertexAttribPointer(
-        2,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(vertex),
-        (void*)(5 * sizeof(float))
-    );
-    glEnableVertexAttribArray(2);
+	// attributi delle posizioni di vertice
+	glVertexAttribPointer(
+		0,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(vertex),
+		(void*)0
+	);
+	glEnableVertexAttribArray(0);
+	
+	// attributi delle coordinate UV
+	glVertexAttribPointer(
+		1,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(vertex),
+		(void*)(3 * sizeof(float))
+	);
+	glEnableVertexAttribArray(1);
+	
+	// attributi dei vettori normali
+	glVertexAttribPointer(
+		2,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(vertex),
+		(void*)(5 * sizeof(float))
+	);
+	glEnableVertexAttribArray(2);
 }
 ```
 
@@ -362,17 +362,17 @@ Tutto il resto diventa chiaro una volta vista una shader, per cui vediamo prima 
 ```glsl
 #version 330 core
 
-uniform mat4 _model;                  // uniform modello 
+uniform mat4 _model;				  // uniform modello 
 
-uniform mat4 _view;                   // uniform globali
+uniform mat4 _view;				   // uniform globali
 uniform mat4 _projection;
 uniform vec3 _cameraPosition;
 
-layout(location = 0) in vec3 aPos;    // input vertice
+layout(location = 0) in vec3 aPos;	// input vertice
 layout(location = 1) in vec2 aUv;
 layout(location = 2) in vec3 aNormal;
 
-out vec2 fragUv;                      // output 
+out vec2 fragUv;					  // output 
 out vec3 fragNormal;
 out vec3 fragView;
 
@@ -405,10 +405,10 @@ Vediamo allora la `frag` shader, che ha bisogno dei materiali veri e propri (tex
 
 uniform sampler2D _tex0; // texture !
 
-in vec2 fragUv;          // input dalla vert
+in vec2 fragUv;		  // input dalla vert
 in vec3 fragNormal;
 
-out vec4 fragColor;      // output pixel
+out vec4 fragColor;	  // output pixel
 
 void main() {
 	// restituisci colore 
@@ -431,29 +431,29 @@ Questo è facile in codice.
 Per compilare una shader la si importa come stringa da un file e si usano alcune chiamate OpenGL:
 ```c
 GLuint compileShaders(const char* vert_shader, const char* frag_shader) {
-    // compila vert
-    GLuint vert = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vert, 1, &vert_shader, NULL);
-    glCompileShader(vert);
-    
-    // compila frag
-    GLuint frag = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(frag, 1, &frag_shader, NULL);
-    glCompileShader(frag);
+	// compila vert
+	GLuint vert = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vert, 1, &vert_shader, NULL);
+	glCompileShader(vert);
+	
+	// compila frag
+	GLuint frag = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(frag, 1, &frag_shader, NULL);
+	glCompileShader(frag);
 
-    // crea programma (vert + frag) 
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vert);
-    glAttachShader(program, frag);
+	// crea programma (vert + frag) 
+	GLuint program = glCreateProgram();
+	glAttachShader(program, vert);
+	glAttachShader(program, frag);
 
-    // collega programma 
-    glLinkProgram(program);
+	// collega programma 
+	glLinkProgram(program);
 
-    // pulisci 
-    glDeleteShader(vert);
-    glDeleteShader(frag);
+	// pulisci 
+	glDeleteShader(vert);
+	glDeleteShader(frag);
 
-    return program;
+	return program;
 }
 ```
 
@@ -461,30 +461,30 @@ Altri oggetti come texture, ecc... si caricano quindi come qualsiasi altro buffe
 Ad esempio, per le `texture` è:
 ```c
 void generateGLTextures(texture* texture) {
-    // genera texture 
-    glGenTextures(1, &texture->tex);
-    glBindTexture(GL_TEXTURE_2D, texture->tex);
+	// genera texture 
+	glGenTextures(1, &texture->tex);
+	glBindTexture(GL_TEXTURE_2D, texture->tex);
 
-    // imposta alcune opzioni 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// imposta alcune opzioni 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // assegna dati alla texture 
-    glTexImage2D(GL_TEXTURE_2D, 
-        0, 
-        GL_RGBA, 
-        texture->width, 
-        texture->height, 
-        0, 
-        GL_RGBA, 
-        GL_UNSIGNED_BYTE, 
-        texture->data
-    );
+	// assegna dati alla texture 
+	glTexImage2D(GL_TEXTURE_2D, 
+		0, 
+		GL_RGBA, 
+		texture->width, 
+		texture->height, 
+		0, 
+		GL_RGBA, 
+		GL_UNSIGNED_BYTE, 
+		texture->data
+	);
 
-    // genera mip map (non significativo per ora) 
-    glGenerateMipmap(GL_TEXTURE_2D);
+	// genera mip map (non significativo per ora) 
+	glGenerateMipmap(GL_TEXTURE_2D);
 }
 ```
 
@@ -558,89 +558,89 @@ In codice:
 ```c
 // invia alla GPU tutte le informazioni necessarie allo shader
 void populateUniforms(
-    material* material,
-    transform transform,
-    mat4x4 view,
-    mat4x4 proj,
-    scene* scene
+	material* material,
+	transform transform,
+	mat4x4 view,
+	mat4x4 proj,
+	scene* scene
 ) {
-    // costruzione della matrice di modello:
-    // scala -> rotazione -> traslazione
-    mat4x4 model;
-    mat4x4_identity(model);
+	// costruzione della matrice di modello:
+	// scala -> rotazione -> traslazione
+	mat4x4 model;
+	mat4x4_identity(model);
 
-    mat4x4_scale_aniso(
-        model, model,
-        transform.scale[0],
-        transform.scale[1],
-        transform.scale[2]
-    );
+	mat4x4_scale_aniso(
+		model, model,
+		transform.scale[0],
+		transform.scale[1],
+		transform.scale[2]
+	);
 
-    mat4x4 rotation;
-    mat4x4_rotate_euler(rotation, transform.rotation);
-    mat4x4_mul(model, rotation, model);
+	mat4x4 rotation;
+	mat4x4_rotate_euler(rotation, transform.rotation);
+	mat4x4_mul(model, rotation, model);
 
-    mat4x4 translation;
-    mat4x4_translate(
-        translation,
-        transform.position[0],
-        transform.position[1],
-        transform.position[2]
-    );
-    mat4x4_mul(model, translation, model);
+	mat4x4 translation;
+	mat4x4_translate(
+		translation,
+		transform.position[0],
+		transform.position[1],
+		transform.position[2]
+	);
+	mat4x4_mul(model, translation, model);
 
-    shader* shader = material->shader;
+	shader* shader = material->shader;
 
-    // invia le matrici di trasformazione
-    glUniformMatrix4fv(shader->uniformLocations[MODEL],      1, GL_FALSE, &model[0][0]);
-    glUniformMatrix4fv(shader->uniformLocations[VIEW],       1, GL_FALSE, &view[0][0]);
-    glUniformMatrix4fv(shader->uniformLocations[PROJECTION], 1, GL_FALSE, &proj[0][0]);
+	// invia le matrici di trasformazione
+	glUniformMatrix4fv(shader->uniformLocations[MODEL],	  1, GL_FALSE, &model[0][0]);
+	glUniformMatrix4fv(shader->uniformLocations[VIEW],	   1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(shader->uniformLocations[PROJECTION], 1, GL_FALSE, &proj[0][0]);
 
-    // invia i parametri della camera
-    glUniform3fv(
-        shader->uniformLocations[CAMERA_POSITION],
-        1,
-        scene->camera.transform.position
-    );
+	// invia i parametri della camera
+	glUniform3fv(
+		shader->uniformLocations[CAMERA_POSITION],
+		1,
+		scene->camera.transform.position
+	);
 
-    // invia i parametri dell'illuminazione
-    glUniform3fv(shader->uniformLocations[SUN_DIRECTION], 1, scene->lighting.sunDirection.position);
-    glUniform3fv(shader->uniformLocations[SUN_COLOR],     1, scene->lighting.sunColor);
-    glUniform3fv(shader->uniformLocations[AMBIENT_COLOR], 1, scene->lighting.ambientColor);
+	// invia i parametri dell'illuminazione
+	glUniform3fv(shader->uniformLocations[SUN_DIRECTION], 1, scene->lighting.sunDirection.position);
+	glUniform3fv(shader->uniformLocations[SUN_COLOR],	 1, scene->lighting.sunColor);
+	glUniform3fv(shader->uniformLocations[AMBIENT_COLOR], 1, scene->lighting.ambientColor);
 
-    // associa le texture alle texture unit
-    for (int i = 0; i < material->n_textures; i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, material->textures[i]->tex);
-        glUniform1i(shader->uniformLocations[TEX0 + i], i);
-    }
+	// associa le texture alle texture unit
+	for (int i = 0; i < material->n_textures; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, material->textures[i]->tex);
+		glUniform1i(shader->uniformLocations[TEX0 + i], i);
+	}
 }
 
 // disegna un singolo oggetto della scena
 void renderObject(
-    object* object,
-    transform transform,
-    mat4x4 view,
-    mat4x4 proj,
-    scene* scene
+	object* object,
+	transform transform,
+	mat4x4 view,
+	mat4x4 proj,
+	scene* scene
 ) {
-    // attiva lo shader
-    glUseProgram(object->material->shader->program);
+	// attiva lo shader
+	glUseProgram(object->material->shader->program);
 
-    // aggiorna tutte le uniform
-    populateUniforms(
-        object->material,
-        transform,
-        view,
-        proj,
-        scene
-    );
+	// aggiorna tutte le uniform
+	populateUniforms(
+		object->material,
+		transform,
+		view,
+		proj,
+		scene
+	);
 
-    // seleziona la geometria
-    glBindVertexArray(object->mesh->vao);
+	// seleziona la geometria
+	glBindVertexArray(object->mesh->vao);
 
-    // emette la draw call
-    glDrawArrays(GL_TRIANGLES, 0, object->mesh->n_verts);
+	// emette la draw call
+	glDrawArrays(GL_TRIANGLES, 0, object->mesh->n_verts);
 }
 ```
 
