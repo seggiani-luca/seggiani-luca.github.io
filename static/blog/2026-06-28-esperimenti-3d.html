@@ -14,7 +14,10 @@
 </head>
 <body>
 <header>
-	<a href="/"><img src="/art/logo.png" alt="logo"/></a>
+	<a href="/">
+		<h1>Luca Seggiani</h1>
+		<p>appunti - codice - musica</p>
+	</a>
 </header>
 <nav>
 <ul>
@@ -103,22 +106,22 @@ In fondo c'è sempre un buffer di facce (triangoli), che altro non sono che trip
 Quindi una faccia sarà data da 3 indici, che indicizzano appunto i vertici del triangolo nel buffer.</p>
 <p>Per rappresentare una mesh in memoria ci dotiamo quindi dei seguenti struct:</p>
 <pre><code class="language-c">typedef struct {
-	int a;
-	int b;
-	int c;
+    int a;
+    int b;
+    int c;
 } triangle;
 
 typedef struct  {
     // array di vertici
-	vector3* verts;
-	int n_verts;
+    vector3* verts;
+    int n_verts;
 
     // array di triangoli
-	triangle* tris;
-	int n_tris;
+    triangle* tris;
+    int n_tris;
 
     // numero di riferimenti
-	int refs;
+    int refs;
 } mesh;
 </code></pre>
 <p>che rispecchiano direttamente la struttura del formato <code>.obj</code>.
@@ -128,8 +131,8 @@ Assunto che in una scena una stessa mesh può essere usata più volte, è opport
 Da lì in poi, per accedere alla stessa mesh basta ottenere lo stesso puntatore, senza doverla ricaricare dal disco.</p>
 <p>Questo meccanismo (sostanzialmente di caching) viene implementato creando una tabella:</p>
 <pre><code class="language-c">typedef struct {
-	char path[MESH_NAME_LEN];
-	mesh* mesh;
+    char path[MESH_NAME_LEN];
+    mesh* mesh;
 } mesh_cache_entry;
 
 // tabella di mesh 
@@ -138,36 +141,36 @@ static mesh_cache_entry mesh_cache[MESH_CACHE_LEN];
 <p>e definendo una funzione che importi le mesh, solo dopo aver controllato di non averle già in cache.
 In pseudocodice C:</p>
 <pre><code class="language-c">mesh* import_mesh(const char* path) {
-	// cerca nella cache 
-	for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
-		mesh_cache_entry* entry = &amp;mesh_cache[i];
+    // cerca nella cache 
+    for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
+        mesh_cache_entry* entry = &amp;mesh_cache[i];
 
-		if(entry-&gt;mesh != NULL &amp;&amp; strcmp(entry-&gt;path, path) == 0) { // match su percorso
-			entry-&gt;mesh-&gt;refs++; // conta riferimenti
-			return entry-&gt;mesh;  // restituisci riferimenti
-		}
-	}
+        if(entry-&gt;mesh != NULL &amp;&amp; strcmp(entry-&gt;path, path) == 0) { // match su percorso
+            entry-&gt;mesh-&gt;refs++; // conta riferimenti
+            return entry-&gt;mesh;  // restituisci riferimenti
+        }
+    }
 
-	// carica mesh da file
-	[...] -&gt; verts, n_verts, tris, n_tris
-	
-	// alloca mesh
-	mesh* m = malloc(sizeof(mesh));
-	*m = (mesh){verts, n_verts, tris, n_tris, 1};
+    // carica mesh da file
+    [...] -&gt; verts, n_verts, tris, n_tris
+    
+    // alloca mesh
+    mesh* m = malloc(sizeof(mesh));
+    *m = (mesh){verts, n_verts, tris, n_tris, 1};
 
-	// registra mesh nella cache
-	for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
-		mesh_cache_entry* entry = &amp;mesh_cache[i];
+    // registra mesh nella cache
+    for(int i = 0; i &lt; MESH_CACHE_LEN; i++) {
+        mesh_cache_entry* entry = &amp;mesh_cache[i];
 
-		if(entry-&gt;mesh == NULL) {
-			strncpy(entry-&gt;path, path, MESH_NAME_LEN - 1); // copia percorso
-			entry-&gt;path[MESH_NAME_LEN - 1] = '\0';
-			entry-&gt;mesh = m;                               // assegna mesh
-			break;
-		}
-	}
+        if(entry-&gt;mesh == NULL) {
+            strncpy(entry-&gt;path, path, MESH_NAME_LEN - 1); // copia percorso
+            entry-&gt;path[MESH_NAME_LEN - 1] = '\0';
+            entry-&gt;mesh = m;                               // assegna mesh
+            break;
+        }
+    }
 
-	return m;
+    return m;
 }
 </code></pre>
 <p>In questo caso il contatore di riferimenti <code>refs</code> è utile per capire se una mesh nella tabella può essere liberata, o è ancora riferita da oggetti nella scena.</p>
@@ -181,19 +184,19 @@ In pseudocodice C:</p>
 <p>Quindi, se si accetta di adottare il modello più semplice possibile, una scena è una lista concatenata di oggetti da renderizzare in sequenza.
 In codice questo equivale a:</p>
 <pre><code class="language-c">typedef struct object {
-	// nome
-	char name[OBJ_NAME_LEN + 1];
+    // nome
+    char name[OBJ_NAME_LEN + 1];
 
-	// mesh e colore
-	mesh* mesh;
-	color col;
+    // mesh e colore
+    mesh* mesh;
+    color col;
 
-	// transform 
-	vector3 point;
-	vector3 euler;
-	vector3 scale;
+    // transform 
+    vector3 point;
+    vector3 euler;
+    vector3 scale;
 
-	struct object* next;
+    struct object* next;
 } object;
 
 // lista di oggetti da renderizzare, sostanzialmente la scena
@@ -212,9 +215,9 @@ Il piano è semplice: una volta che le mesh sono state configurate e assemblate 
 <p>Per disegnare un oggetto, che ha la sua posizione, rotazione e scala (trasformazione) nella secna, dobbiamo capire da dove lo guardiamo, cioè definire una telecamera virtuale.
 La mettiamo nel seguente struct:</p>
 <pre><code class="language-c">typedef struct {
-	vector3 point; // dove si trova?
-	vector3 euler; // dove sta guardando?
-	float focal;   // lunghezza focale
+    vector3 point; // dove si trova?
+    vector3 euler; // dove sta guardando?
+    float focal;   // lunghezza focale
 } camera;
 
 // telecamera della secna 
@@ -239,114 +242,114 @@ Si vede che aumentando la distanza focale, il &quot;raggio&quot; visivo, cioè l
 <p>In questo caso ho scelto di renderizzare un cubo in 3D, con la possibilità di ruotarlo.
 Per le matrici di rotazione (che ci torneranno utili a breve) rimando a quanto scritto <a href="https://seggiani-luca.github.io/quartz/Meccanica-Razionale/Matrici-di-rotazione">qui</a>, che è un po formale, ma dovrebbe spiegare la forma che usiamo:</p>
 <pre><code class="language-c">matrix3 rot_matrix(axis ax, float angle) {
-	float c = cos(angle);
-	float s = sin(angle);
+    float c = cos(angle);
+    float s = sin(angle);
 
-	switch(ax) {
-		case X:
-			return (matrix3) {{
-				{ 1,  0,   0},
-				{ 0,  c,  -s},
-				{ 0,  s,   c}
-			}};
-		case Y:
-			return (matrix3) {{
-				{ c,  0,  s},
-				{ 0,  1,  0},
-				{-s,  0,  c}
-			}};
-		case Z:
-			return (matrix3) {{
-				{ c, -s,  0},
-				{ s,  c,  0},
-				{ 0,  0,  1}
-			}};
-		default:
-			return (matrix3){0};
-	}
+    switch(ax) {
+        case X:
+            return (matrix3) {{
+                { 1,  0,   0},
+                { 0,  c,  -s},
+                { 0,  s,   c}
+            }};
+        case Y:
+            return (matrix3) {{
+                { c,  0,  s},
+                { 0,  1,  0},
+                {-s,  0,  c}
+            }};
+        case Z:
+            return (matrix3) {{
+                { c, -s,  0},
+                { s,  c,  0},
+                { 0,  0,  1}
+            }};
+        default:
+            return (matrix3){0};
+    }
 }
 </code></pre>
 <p>Quindi, è bastato definire una semplice mesh direttamente in Desmos, trasformarla con la matrice di rotazione su Z, e proiettare.</p>
 <p>La stessa cosa è quella che facciamo in codice C nell'applicazione:</p>
 <pre><code class="language-c">void render_obj(const object* obj) {
-	if(obj-&gt;mesh == NULL) return;
+    if(obj-&gt;mesh == NULL) return;
 
-	// array di vertici proiettati
-	vector3* proj_verts = malloc(sizeof(vector3) * obj-&gt;mesh-&gt;n_verts);
+    // array di vertici proiettati
+    vector3* proj_verts = malloc(sizeof(vector3) * obj-&gt;mesh-&gt;n_verts);
 
-	// itera su tutti i vertici
-	for(int v = 0; v &lt; obj-&gt;mesh-&gt;n_verts; v++) {
-		// trasforma vertice
-		vector3 vert = obj-&gt;mesh-&gt;verts[v];
-		vert = transform(vert, obj-&gt;point, obj-&gt;euler, obj-&gt;scale);
-	
-		// proietta vertice e memoriza
-		vector3 proj = project(vert);
-		proj_verts[v] = proj;
-	}
+    // itera su tutti i vertici
+    for(int v = 0; v &lt; obj-&gt;mesh-&gt;n_verts; v++) {
+        // trasforma vertice
+        vector3 vert = obj-&gt;mesh-&gt;verts[v];
+        vert = transform(vert, obj-&gt;point, obj-&gt;euler, obj-&gt;scale);
+    
+        // proietta vertice e memoriza
+        vector3 proj = project(vert);
+        proj_verts[v] = proj;
+    }
 
-	// disegna triangoli
-	for(int t = 0; t &lt; obj-&gt;mesh-&gt;n_tris; t++) {
-		// get triangle
-		triangle tri = obj-&gt;mesh-&gt;tris[t];
-		line(
-			proj_verts[tri.a].x, proj_verts[tri.a].y,
-			proj_verts[tri.b].x, proj_verts[tri.b].y,
-			obj-&gt;col
-		);
-		line(
-			proj_verts[tri.b].x, proj_verts[tri.b].y,
-			proj_verts[tri.c].x, proj_verts[tri.c].y,
-			obj-&gt;col
-		);
-		line(
-			proj_verts[tri.a].x, proj_verts[tri.a].y,
-			proj_verts[tri.c].x, proj_verts[tri.c].y,
-			obj-&gt;col
-		);
-	}
+    // disegna triangoli
+    for(int t = 0; t &lt; obj-&gt;mesh-&gt;n_tris; t++) {
+        // get triangle
+        triangle tri = obj-&gt;mesh-&gt;tris[t];
+        line(
+            proj_verts[tri.a].x, proj_verts[tri.a].y,
+            proj_verts[tri.b].x, proj_verts[tri.b].y,
+            obj-&gt;col
+        );
+        line(
+            proj_verts[tri.b].x, proj_verts[tri.b].y,
+            proj_verts[tri.c].x, proj_verts[tri.c].y,
+            obj-&gt;col
+        );
+        line(
+            proj_verts[tri.a].x, proj_verts[tri.a].y,
+            proj_verts[tri.c].x, proj_verts[tri.c].y,
+            obj-&gt;col
+        );
+    }
 
-	// libera array di vertici proiettati 
-	free(proj_verts);
+    // libera array di vertici proiettati 
+    free(proj_verts);
 }
 </code></pre>
 <p>Per disegnare i triangoli, facciamo semplicemente uso della funzione <code>line()</code> chiamata su tutte le coppie di vertici che formano i triangoli, come definito dalla mesh.</p>
 <p>La <code>project()</code> equivale a come l'abbiamo vista in Desmos:</p>
 <pre><code class="language-c">vector3 project(vector3 vert) {
-	// trasla nello spazio della telecamera
-	vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
-	d = rotate(d, vec_by_sca(cam.euler, -1));
+    // trasla nello spazio della telecamera
+    vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
+    d = rotate(d, vec_by_sca(cam.euler, -1));
 
-	if (d.z &lt;= 0.01f) // salta
+    if (d.z &lt;= 0.01f) // salta
 
-	// formule di proiezione
-	float proj_x = (cam.focal * d.x) / d.z;
-	float proj_y = (cam.focal * d.y) / d.z;
+    // formule di proiezione
+    float proj_x = (cam.focal * d.x) / d.z;
+    float proj_y = (cam.focal * d.y) / d.z;
 
-	// scala sullo schermo
-	float screen_x = WIDTH  * 0.5f + proj_x;
-	float screen_y = HEIGHT * 0.5f - proj_y;
+    // scala sullo schermo
+    float screen_x = WIDTH  * 0.5f + proj_x;
+    float screen_y = HEIGHT * 0.5f - proj_y;
 
-	return (vector3){screen_x, screen_y, 0};
+    return (vector3){screen_x, screen_y, 0};
 }
 </code></pre>
 <p>cioè prima dobbiamo riportarci allo spazio della telecamera (essenzialmente applicare la posizione della telecamera e la sua rotazione).
 Quindi si possono applicare le formule di proiezione, con una leggera complicazione data dal fatto che dobbiamo riportare tutto nello spazio di coordinate dello schermo.</p>
 <p>La <code>transform()</code> è invece l'applicazione di alcune funzioncine di algebra lineare:</p>
 <pre><code class="language-c">vector3 transform(vector3 vert, vector3 point, vector3 euler, vector3 scale) {
-	vert = vec_by_vec(vert, scale); // scala  (moltiplicazione membro a membro)
-	vert = rotate(vert, euler);     // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
-	vert = vec_pl_vec(vert, point); // trasla (addizione vettoriale)
-	return vert;
+    vert = vec_by_vec(vert, scale); // scala  (moltiplicazione membro a membro)
+    vert = rotate(vert, euler);     // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
+    vert = vec_pl_vec(vert, point); // trasla (addizione vettoriale)
+    return vert;
 }
 </code></pre>
 <p>La <code>rotate()</code>, come notato dai commenti, consiste in 3 moltiplicazioni matriciali, una per ciascuna matrice di rotazione Z, Y e X:</p>
 <pre><code class="language-c">vector3 rotate(vector3 v, vector3 euler) {
-	v = mat_by_vec(rot_matrix(Z, euler.z), v);
-	v = mat_by_vec(rot_matrix(Y, euler.y), v);
-	v = mat_by_vec(rot_matrix(X, euler.x), v);
+    v = mat_by_vec(rot_matrix(Z, euler.z), v);
+    v = mat_by_vec(rot_matrix(Y, euler.y), v);
+    v = mat_by_vec(rot_matrix(X, euler.x), v);
 
-	return v;
+    return v;
 }
 </code></pre>
 <p>Il risultato di tutto questo codice è che, con le mesh giuste e una scena appositamente configurata, si possono renderizzare dei semplici wireframe:</p>
@@ -359,6 +362,13 @@ In ogni caso, spero che quanto visto qui possa essere stato utile o almeno inter
 Cheers!</p>
 </main>
 <footer>
+	<script src="https://utteranc.es/client.js"
+			repo="seggiani-luca/seggiani-luca.github.io"
+			issue-term="pathname"
+			theme="dark-blue"
+			crossorigin="anonymous"
+			async>
+	</script>
 	<div class="badges">
 		<a href="https://archlinux.org/"><img src="/art/badges/arch.gif" alt="arch" title="i use arch btw" height=31 width=88/></a>
 		<a href="https://github.com/"><img src="/art/badges/github.gif" alt="github" title="hosted on github pages" height=31 width=88/></a>

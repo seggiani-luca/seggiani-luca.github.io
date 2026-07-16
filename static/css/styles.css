@@ -1,9 +1,9 @@
 :root {
     /* colors */
-	--page-bg:   #2f5f95;
-	--header-bg: #1d3f7a;
-	--table-bg:  #4a6f9a;
-	--code-bg:   #3f5f8a;
+	--page-bg:   #142038;
+	--header-bg: #15233d;
+	--table-bg:  #344a6f;
+	--code-bg:   #2e4161;
 
 	--link:      #b7e0ff;
 
@@ -20,9 +20,8 @@
 /* body */
 
 html {
-	background: url("/art/bg.svg");
-	background-size: 1000px;
-	background-attachment: fixed;
+	background: var(--page-bg);
+	font-size: 90%;
 }
 
 body {
@@ -33,10 +32,10 @@ body {
 	
 	font-family: var(--sans);
 	
-	max-width: 800px;
+	max-width: 600px;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 600px) {
     body {
     	margin: 15px;
 	}
@@ -46,12 +45,33 @@ body {
 
 header {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 }
 
-header img {
+header a {
 	width: 100%;
+	text-decoration: none;
+	color: var(--fg);
+}
+
+header h1 {
+	font-size: 2em;
+	margin-bottom: 0;
+	padding-left: 0;
+	padding-bottom: 0;
+	
+	background:
+		linear-gradient(90deg, var(--page-bg) 50%, rgba(0, 0, 0, 0) 100%),
+		radial-gradient(circle, var(--link) 1px, var(--page-bg) 1px);
+	background-size: 
+		100% auto, 
+		10px 100%;
+}
+
+header p {
+	margin-left: 0;
 }
 
 /* nav */
@@ -62,7 +82,7 @@ nav ul {
 	margin-bottom: 10px;
 
 	background-color: var(--header-bg);
-	border: solid 1px var(--link);
+	box-shadow: 0 0 1px var(--link);
 
 	list-style: none;
 	
@@ -82,6 +102,7 @@ main {
 	padding-bottom: 10px;
 
 	background-color: var(--table-bg);
+	box-shadow: 0 0 1px var(--link);
 	border: solid 5px var(--header-bg);
 	border-top: none;
 }
@@ -89,6 +110,7 @@ main {
 p {
 	margin-top: 0;
 	margin-bottom: 10px;
+	text-align: justify;
 }
 
 a {
@@ -190,6 +212,13 @@ footer {
 
 .badges a img {
 	image-rendering: pixelated;
+}
+
+@media (max-width: 600px) {
+    .badges a img {
+		width: 44px;
+		height: 15px;
+	}
 }
 
 /* code */

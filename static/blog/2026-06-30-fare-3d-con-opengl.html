@@ -14,7 +14,10 @@
 </head>
 <body>
 <header>
-	<a href="/"><img src="/art/logo.png" alt="logo"/></a>
+	<a href="/">
+		<h1>Luca Seggiani</h1>
+		<p>appunti - codice - musica</p>
+	</a>
 </header>
 <nav>
 <ul>
@@ -84,61 +87,61 @@ Per aprire un contesto OpenGL e disegnare qualcosa abbiamo bisogno <em>almeno</e
 GLFWwindow* window = NULL; // la finestra
 
 int coreCreate() {
-	// 1. inizializza GLFW
+    // 1. inizializza GLFW
 
-	if (!glfwInit()) {
-		printf(&quot;Failed to initialize GLFW\n&quot;);
-		return 0;
-	}
+    if (!glfwInit()) {
+        printf(&quot;Failed to initialize GLFW\n&quot;);
+        return 0;
+    }
 
-	// 2. indica
+    // 2. indica
 
-	// indica finestra fluttuante e a dimensione fissa 
-	glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    // indica finestra fluttuante e a dimensione fissa 
+    glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	// indica versione OpenGL
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_VERSION_MAJOR);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_VERSION_MINOR);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // indica versione OpenGL
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_VERSION_MAJOR);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_VERSION_MINOR);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// indica piattaforma
-	glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
-	
-	// indica double buffering 
-	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    // indica piattaforma
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+    
+    // indica double buffering 
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
-	// 3. crea finestra
+    // 3. crea finestra
 
-	window = glfwCreateWindow(
-		WIN_WIDTH,
-		WIN_HEIGHT, 
-		WIN_TITLE, 
-		NULL, NULL
-	);
-	if (!window) {
-		glfwTerminate();
-		printf(&quot;Failed to create context\n&quot;);
-		return 0;
-	}
+    window = glfwCreateWindow(
+        WIN_WIDTH,
+        WIN_HEIGHT, 
+        WIN_TITLE, 
+        NULL, NULL
+    );
+    if (!window) {
+        glfwTerminate();
+        printf(&quot;Failed to create context\n&quot;);
+        return 0;
+    }
 
-	glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(window);
 
-	// 4. carica OpenGL
+    // 4. carica OpenGL
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		printf(&quot;Failed to initialize GLAD\n&quot;);
-		return 0;
-	}
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        printf(&quot;Failed to initialize GLAD\n&quot;);
+        return 0;
+    }
 
-	// 5. configura OpenGL
+    // 5. configura OpenGL
 
-	int fWidth, fHeight;
-	glfwGetFramebufferSize(window, &amp;fWidth, &amp;fHeight);
-	glViewport(0, 0, fWidth, fHeight);
-	glEnable(GL_DEPTH_TEST);		
+    int fWidth, fHeight;
+    glfwGetFramebufferSize(window, &amp;fWidth, &amp;fHeight);
+    glViewport(0, 0, fWidth, fHeight);
+    glEnable(GL_DEPTH_TEST);        
 
-	return 1;
+    return 1;
 }
 
 </code></pre>
@@ -165,9 +168,9 @@ Infatti, quando si carica una risorsa dal disco (sia questo un materiale), la si
 Da lì in poi, per accedere alla stessa mesh basta ottenere lo stesso puntatore, senza doverla ricaricare dal disco.</p>
 <p>Questo può essere realizzato in maniera indipendente dal tipo di risorsa trattato dotandoci di un riferimento a risorsa generico:</p>
 <pre><code class="language-c">typedef struct {
-	char path[DATA_PATH_SIZE];
-	void* data;
-	int ref_count;
+    char path[DATA_PATH_SIZE];
+    void* data;
+    int ref_count;
 } dataRef;
 </code></pre>
 <p>Il puntatore <code>data</code> sarà di tipo <code>void</code> per puntare a qualsiasi <code>struct</code> rappresentante dati.
@@ -374,13 +377,13 @@ out vec3 fragNormal;
 out vec3 fragView;
 
 void main() {
-	// trasforma vertice e proietta
-	gl_Position = _projection * _view * _model * vec4(aPos, 1.0);
+    // trasforma vertice e proietta
+    gl_Position = _projection * _view * _model * vec4(aPos, 1.0);
 
-	// passa altri parametri
-	fragUv = aUv;
-	fragNormal = mat3(_model) * aNormal;
-	fragView = _cameraPosition - aPos;
+    // passa altri parametri
+    fragUv = aUv;
+    fragNormal = mat3(_model) * aNormal;
+    fragView = _cameraPosition - aPos;
 }
 </code></pre>
 <p>Qui siamo nella terra delle mesh, per cui vediamo gli ingressi:</p>
@@ -407,9 +410,9 @@ in vec3 fragNormal;
 out vec4 fragColor;      // output pixel
 
 void main() {
-	// restituisci colore 
-	vec3 albedo = texture(_tex0, fragUv).rgb;
-	fragColor = vec4(albedo, 1.0); 
+    // restituisci colore 
+    vec3 albedo = texture(_tex0, fragUv).rgb;
+    fragColor = vec4(albedo, 1.0); 
 }
 </code></pre>
 <p>Qui prendiamo in ingresso:</p>
@@ -494,31 +497,31 @@ Con gli oggetti è poi utile realizzare i cosiddetti <em>scene graph</em>, cioè
 Questi alberi sono rappresentati, come si può studiare in qualsiasi dispensa di strutture dati, con 2 puntatori (più il puntatore a padre, incluso per comodità).
 Vediamo l'oggetto <code>object</code>:</p>
 <pre><code class="language-c">typedef struct object {
-	char name[OBJECT_NAME_SIZE];
-	transform transform;
-	mesh* mesh;
-	material* material;
-	
-	// gerarchia 
-	struct object* next;
-	struct object* parent; // OBJECT_INVALID signal 
-	struct object* child;
+    char name[OBJECT_NAME_SIZE];
+    transform transform;
+    mesh* mesh;
+    material* material;
+    
+    // gerarchia 
+    struct object* next;
+    struct object* parent; // OBJECT_INVALID signal 
+    struct object* child;
 } object;
 </code></pre>
 <p>Gli scene graph dovevano inizialmente essere parte dello standard OpenGL, ma SGI non è riuscita a standardizzarli.</p>
 <p>Il nostro approccio dovrebbe essere più che abbastanza.
 Basterà prevedere un oggetto <code>scene</code> che raggruppa più oggetti in un albero, puntato da un nodo <code>root</code>:</p>
 <pre><code class="language-c">typedef struct {
-	char name[DATA_NAME_SIZE];
+    char name[DATA_NAME_SIZE];
 
-	// oggetti speciali 
-	camera camera;
-	lighting lighting;
+    // oggetti speciali 
+    camera camera;
+    lighting lighting;
 
-	// oggetti 
-	object objects[SCENE_MAX_OBJECTS];
-	int n_objects;
-	object* root;
+    // oggetti 
+    object objects[SCENE_MAX_OBJECTS];
+    int n_objects;
+    object* root;
 } scene;
 </code></pre>
 <p>Vediamo che abbiamo bisogno di alcuni oggetti speciali: un'API più simpatica prevederebbe il polimorfismo degli oggetti (o un pattern più complicato come l'<a href="https://en.wikipedia.org/wiki/Entity_component_system">ECS</a>).
@@ -634,6 +637,13 @@ Il codice nella repository allegata fa in sostanza tutto questo (più un po di p
 <p>Quindi, si possono fare tante discussioni su come si gestiscono gli oggetti, mesh e materiali, sopratutto nella ricerca di metodi di allocazione che siano efficienti sia per il rendering 3D che per la gestione attraverso strumenti esterni, cosa che si vuole fare ad esempio nello sviluppo di videogiochi.</p>
 </main>
 <footer>
+	<script src="https://utteranc.es/client.js"
+			repo="seggiani-luca/seggiani-luca.github.io"
+			issue-term="pathname"
+			theme="dark-blue"
+			crossorigin="anonymous"
+			async>
+	</script>
 	<div class="badges">
 		<a href="https://archlinux.org/"><img src="/art/badges/arch.gif" alt="arch" title="i use arch btw" height=31 width=88/></a>
 		<a href="https://github.com/"><img src="/art/badges/github.gif" alt="github" title="hosted on github pages" height=31 width=88/></a>

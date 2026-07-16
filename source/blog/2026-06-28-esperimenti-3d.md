@@ -92,22 +92,22 @@ Quindi una faccia sarà data da 3 indici, che indicizzano appunto i vertici del 
 Per rappresentare una mesh in memoria ci dotiamo quindi dei seguenti struct:
 ```c
 typedef struct {
-	int a;
-	int b;
-	int c;
+    int a;
+    int b;
+    int c;
 } triangle;
 
 typedef struct  {
-	// array di vertici
-	vector3* verts;
-	int n_verts;
+    // array di vertici
+    vector3* verts;
+    int n_verts;
 
-	// array di triangoli
-	triangle* tris;
-	int n_tris;
+    // array di triangoli
+    triangle* tris;
+    int n_tris;
 
-	// numero di riferimenti
-	int refs;
+    // numero di riferimenti
+    int refs;
 } mesh;
 ```
 che rispecchiano direttamente la struttura del formato `.obj`.
@@ -120,8 +120,8 @@ Da lì in poi, per accedere alla stessa mesh basta ottenere lo stesso puntatore,
 Questo meccanismo (sostanzialmente di caching) viene implementato creando una tabella:
 ```c
 typedef struct {
-	char path[MESH_NAME_LEN];
-	mesh* mesh;
+    char path[MESH_NAME_LEN];
+    mesh* mesh;
 } mesh_cache_entry;
 
 // tabella di mesh 
@@ -131,36 +131,36 @@ e definendo una funzione che importi le mesh, solo dopo aver controllato di non 
 In pseudocodice C:
 ```c
 mesh* import_mesh(const char* path) {
-	// cerca nella cache 
-	for(int i = 0; i < MESH_CACHE_LEN; i++) {
-		mesh_cache_entry* entry = &mesh_cache[i];
+    // cerca nella cache 
+    for(int i = 0; i < MESH_CACHE_LEN; i++) {
+        mesh_cache_entry* entry = &mesh_cache[i];
 
-		if(entry->mesh != NULL && strcmp(entry->path, path) == 0) { // match su percorso
-			entry->mesh->refs++; // conta riferimenti
-			return entry->mesh;  // restituisci riferimenti
-		}
-	}
+        if(entry->mesh != NULL && strcmp(entry->path, path) == 0) { // match su percorso
+            entry->mesh->refs++; // conta riferimenti
+            return entry->mesh;  // restituisci riferimenti
+        }
+    }
 
-	// carica mesh da file
-	[...] -> verts, n_verts, tris, n_tris
-	
-	// alloca mesh
-	mesh* m = malloc(sizeof(mesh));
-	*m = (mesh){verts, n_verts, tris, n_tris, 1};
+    // carica mesh da file
+    [...] -> verts, n_verts, tris, n_tris
+    
+    // alloca mesh
+    mesh* m = malloc(sizeof(mesh));
+    *m = (mesh){verts, n_verts, tris, n_tris, 1};
 
-	// registra mesh nella cache
-	for(int i = 0; i < MESH_CACHE_LEN; i++) {
-		mesh_cache_entry* entry = &mesh_cache[i];
+    // registra mesh nella cache
+    for(int i = 0; i < MESH_CACHE_LEN; i++) {
+        mesh_cache_entry* entry = &mesh_cache[i];
 
-		if(entry->mesh == NULL) {
-			strncpy(entry->path, path, MESH_NAME_LEN - 1); // copia percorso
-			entry->path[MESH_NAME_LEN - 1] = '\0';
-			entry->mesh = m;							   // assegna mesh
-			break;
-		}
-	}
+        if(entry->mesh == NULL) {
+            strncpy(entry->path, path, MESH_NAME_LEN - 1); // copia percorso
+            entry->path[MESH_NAME_LEN - 1] = '\0';
+            entry->mesh = m;                               // assegna mesh
+            break;
+        }
+    }
 
-	return m;
+    return m;
 }
 ```
 
@@ -178,19 +178,19 @@ In codice questo equivale a:
 
 ```c
 typedef struct object {
-	// nome
-	char name[OBJ_NAME_LEN + 1];
+    // nome
+    char name[OBJ_NAME_LEN + 1];
 
-	// mesh e colore
-	mesh* mesh;
-	color col;
+    // mesh e colore
+    mesh* mesh;
+    color col;
 
-	// transform 
-	vector3 point;
-	vector3 euler;
-	vector3 scale;
+    // transform 
+    vector3 point;
+    vector3 euler;
+    vector3 scale;
 
-	struct object* next;
+    struct object* next;
 } object;
 
 // lista di oggetti da renderizzare, sostanzialmente la scena
@@ -217,9 +217,9 @@ La mettiamo nel seguente struct:
 
 ```c
 typedef struct {
-	vector3 point; // dove si trova?
-	vector3 euler; // dove sta guardando?
-	float focal;   // lunghezza focale
+    vector3 point; // dove si trova?
+    vector3 euler; // dove sta guardando?
+    float focal;   // lunghezza focale
 } camera;
 
 // telecamera della secna 
@@ -255,31 +255,31 @@ Per le matrici di rotazione (che ci torneranno utili a breve) rimando a quanto s
 
 ```c
 matrix3 rot_matrix(axis ax, float angle) {
-	float c = cos(angle);
-	float s = sin(angle);
+    float c = cos(angle);
+    float s = sin(angle);
 
-	switch(ax) {
-		case X:
-			return (matrix3) {{
-				{ 1,  0,   0},
-				{ 0,  c,  -s},
-				{ 0,  s,   c}
-			}};
-		case Y:
-			return (matrix3) {{
-				{ c,  0,  s},
-				{ 0,  1,  0},
-				{-s,  0,  c}
-			}};
-		case Z:
-			return (matrix3) {{
-				{ c, -s,  0},
-				{ s,  c,  0},
-				{ 0,  0,  1}
-			}};
-		default:
-			return (matrix3){0};
-	}
+    switch(ax) {
+        case X:
+            return (matrix3) {{
+                { 1,  0,   0},
+                { 0,  c,  -s},
+                { 0,  s,   c}
+            }};
+        case Y:
+            return (matrix3) {{
+                { c,  0,  s},
+                { 0,  1,  0},
+                {-s,  0,  c}
+            }};
+        case Z:
+            return (matrix3) {{
+                { c, -s,  0},
+                { s,  c,  0},
+                { 0,  0,  1}
+            }};
+        default:
+            return (matrix3){0};
+    }
 }
 ```
 
@@ -288,45 +288,45 @@ Quindi, è bastato definire una semplice mesh direttamente in Desmos, trasformar
 La stessa cosa è quella che facciamo in codice C nell'applicazione:
 ```c
 void render_obj(const object* obj) {
-	if(obj->mesh == NULL) return;
+    if(obj->mesh == NULL) return;
 
-	// array di vertici proiettati
-	vector3* proj_verts = malloc(sizeof(vector3) * obj->mesh->n_verts);
+    // array di vertici proiettati
+    vector3* proj_verts = malloc(sizeof(vector3) * obj->mesh->n_verts);
 
-	// itera su tutti i vertici
-	for(int v = 0; v < obj->mesh->n_verts; v++) {
-		// trasforma vertice
-		vector3 vert = obj->mesh->verts[v];
-		vert = transform(vert, obj->point, obj->euler, obj->scale);
-	
-		// proietta vertice e memoriza
-		vector3 proj = project(vert);
-		proj_verts[v] = proj;
-	}
+    // itera su tutti i vertici
+    for(int v = 0; v < obj->mesh->n_verts; v++) {
+        // trasforma vertice
+        vector3 vert = obj->mesh->verts[v];
+        vert = transform(vert, obj->point, obj->euler, obj->scale);
+    
+        // proietta vertice e memoriza
+        vector3 proj = project(vert);
+        proj_verts[v] = proj;
+    }
 
-	// disegna triangoli
-	for(int t = 0; t < obj->mesh->n_tris; t++) {
-		// get triangle
-		triangle tri = obj->mesh->tris[t];
-		line(
-			proj_verts[tri.a].x, proj_verts[tri.a].y,
-			proj_verts[tri.b].x, proj_verts[tri.b].y,
-			obj->col
-		);
-		line(
-			proj_verts[tri.b].x, proj_verts[tri.b].y,
-			proj_verts[tri.c].x, proj_verts[tri.c].y,
-			obj->col
-		);
-		line(
-			proj_verts[tri.a].x, proj_verts[tri.a].y,
-			proj_verts[tri.c].x, proj_verts[tri.c].y,
-			obj->col
-		);
-	}
+    // disegna triangoli
+    for(int t = 0; t < obj->mesh->n_tris; t++) {
+        // get triangle
+        triangle tri = obj->mesh->tris[t];
+        line(
+            proj_verts[tri.a].x, proj_verts[tri.a].y,
+            proj_verts[tri.b].x, proj_verts[tri.b].y,
+            obj->col
+        );
+        line(
+            proj_verts[tri.b].x, proj_verts[tri.b].y,
+            proj_verts[tri.c].x, proj_verts[tri.c].y,
+            obj->col
+        );
+        line(
+            proj_verts[tri.a].x, proj_verts[tri.a].y,
+            proj_verts[tri.c].x, proj_verts[tri.c].y,
+            obj->col
+        );
+    }
 
-	// libera array di vertici proiettati 
-	free(proj_verts);
+    // libera array di vertici proiettati 
+    free(proj_verts);
 }
 ```
 
@@ -335,21 +335,21 @@ Per disegnare i triangoli, facciamo semplicemente uso della funzione `line()` ch
 La `project()` equivale a come l'abbiamo vista in Desmos:
 ```c
 vector3 project(vector3 vert) {
-	// trasla nello spazio della telecamera
-	vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
-	d = rotate(d, vec_by_sca(cam.euler, -1));
+    // trasla nello spazio della telecamera
+    vector3 d = vec_pl_vec(vert, vec_by_sca(cam.point, -1));
+    d = rotate(d, vec_by_sca(cam.euler, -1));
 
-	if (d.z <= 0.01f) // salta
+    if (d.z <= 0.01f) // salta
 
-	// formule di proiezione
-	float proj_x = (cam.focal * d.x) / d.z;
-	float proj_y = (cam.focal * d.y) / d.z;
+    // formule di proiezione
+    float proj_x = (cam.focal * d.x) / d.z;
+    float proj_y = (cam.focal * d.y) / d.z;
 
-	// scala sullo schermo
-	float screen_x = WIDTH  * 0.5f + proj_x;
-	float screen_y = HEIGHT * 0.5f - proj_y;
+    // scala sullo schermo
+    float screen_x = WIDTH  * 0.5f + proj_x;
+    float screen_y = HEIGHT * 0.5f - proj_y;
 
-	return (vector3){screen_x, screen_y, 0};
+    return (vector3){screen_x, screen_y, 0};
 }
 ```
 cioè prima dobbiamo riportarci allo spazio della telecamera (essenzialmente applicare la posizione della telecamera e la sua rotazione).
@@ -359,21 +359,21 @@ La `transform()` è invece l'applicazione di alcune funzioncine di algebra linea
 
 ```c
 vector3 transform(vector3 vert, vector3 point, vector3 euler, vector3 scale) {
-	vert = vec_by_vec(vert, scale); // scala  (moltiplicazione membro a membro)
-	vert = rotate(vert, euler);	 // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
-	vert = vec_pl_vec(vert, point); // trasla (addizione vettoriale)
-	return vert;
+    vert = vec_by_vec(vert, scale); // scala  (moltiplicazione membro a membro)
+    vert = rotate(vert, euler);     // ruota  (moltiplicazione per le 3 matrici di rotazione Z, Y e X)
+    vert = vec_pl_vec(vert, point); // trasla (addizione vettoriale)
+    return vert;
 }
 ```
 
 La `rotate()`, come notato dai commenti, consiste in 3 moltiplicazioni matriciali, una per ciascuna matrice di rotazione Z, Y e X:
 ```c
 vector3 rotate(vector3 v, vector3 euler) {
-	v = mat_by_vec(rot_matrix(Z, euler.z), v);
-	v = mat_by_vec(rot_matrix(Y, euler.y), v);
-	v = mat_by_vec(rot_matrix(X, euler.x), v);
+    v = mat_by_vec(rot_matrix(Z, euler.z), v);
+    v = mat_by_vec(rot_matrix(Y, euler.y), v);
+    v = mat_by_vec(rot_matrix(X, euler.x), v);
 
-	return v;
+    return v;
 }
 ```
 

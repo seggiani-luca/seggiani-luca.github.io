@@ -14,15 +14,15 @@ Un oggetto era rappresentato dal seguente struct:
 
 ```c
 typedef struct object {
-	char name[OBJECT_NAME_SIZE];
-	transform transform;
-	mesh* mesh;
-	material* material;
+    char name[OBJECT_NAME_SIZE];
+    transform transform;
+    mesh* mesh;
+    material* material;
 
-	// gerarchia 
-	struct object* next;
-	struct object* parent; // qui segnalavo gli oggetti invalidi con 0
-	struct object* child;
+    // gerarchia 
+    struct object* next;
+    struct object* parent; // qui segnalavo gli oggetti invalidi con 0
+    struct object* child;
 } object;
 ```
 
@@ -33,16 +33,16 @@ Abbiamo detto che usavo un allocatore ad arena, infatti le scene erano rappresen
 
 ```c
 typedef struct {
-	char name[DATA_NAME_SIZE];
+    char name[DATA_NAME_SIZE];
 
-	// oggetti "speciali"
-	camera camera;
-	lighting lighting;
+    // oggetti "speciali"
+    camera camera;
+    lighting lighting;
 
-	// oggetti
-	object objects[SCENE_MAX_OBJECTS];
-	int n_objects;
-	object* root;
+    // oggetti
+    object objects[SCENE_MAX_OBJECTS];
+    int n_objects;
+    object* root;
 } scene;
 ```
 
@@ -122,48 +122,48 @@ Il codice si spiega meglio delle parole:
 ```c
 // vtabe dei metodi di accesso ai campi 
 typedef struct {
-	// metodo di lettura 
-	void (*read)(const field* f, void* dst);
+    // metodo di lettura 
+    void (*read)(const field* f, void* dst);
 
-	// metodo di scrittura 
-	void (*write)(field* f, const void* src);
+    // metodo di scrittura 
+    void (*write)(field* f, const void* src);
 
-	// metodo di stampa 
-	void (*print)(const field* f);
-	
-	// metodo di serializzazione 
-	void (*serialize)(const field* f, char* buf);
-	
-	// metodo di deserializzazione 
-	field* (*deserialize)(const char* buf);
+    // metodo di stampa 
+    void (*print)(const field* f);
+    
+    // metodo di serializzazione 
+    void (*serialize)(const field* f, char* buf);
+    
+    // metodo di deserializzazione 
+    field* (*deserialize)(const char* buf);
 
-	// metodo di rendering sull'interfaccia 
-	int (*gui)(const field* f, guiContext* ctx);
+    // metodo di rendering sull'interfaccia 
+    int (*gui)(const field* f, guiContext* ctx);
 } fieldVtable;
 
 // un campo base
 struct field {
-	char name[ENT_NAME_SIZ];
+    char name[ENT_NAME_SIZ];
 
-	// vtable dei metodi di accesso
-	fieldVtable* vtable;
+    // vtable dei metodi di accesso
+    fieldVtable* vtable;
 
-	// è una lista, quindi prossimo
-	field* next;
+    // è una lista, quindi prossimo
+    field* next;
 };
 
 // entità
 struct entity {
-	char name[ENT_NAME_SIZ];
+    char name[ENT_NAME_SIZ];
 
-	// radice della lista di campi
-	field* root;
+    // radice della lista di campi
+    field* root;
 
 
-	// gerarchia
-	struct entity* parent;
-	struct entity* child;
-	struct entity* peer;
+    // gerarchia
+    struct entity* parent;
+    struct entity* child;
+    struct entity* peer;
 };
 typedef struct entity entity;
 ```
@@ -183,10 +183,10 @@ Sempre in codice, vediamo il campo `int`, cioè il semplice tipo intero:
 // int.h
 
 typedef struct {
-	field base;
+    field base;
 
-	// dati, cioè l'int stessa
-	int val;
+    // dati, cioè l'int stessa
+    int val;
 } intField;
 
 // crea un nuovo campo int
@@ -196,31 +196,31 @@ field* intNew(const char* name);
 
 // legge l'int
 void intRead(const field* f, void* dst) {
-	*(int*)dst = ((intField*)f)->val;
+    *(int*)dst = ((intField*)f)->val;
 }
 
 // scrive l'int
 void intWrite(field* f, const void* src) {
-	((intField*)f)->val = *(int*)src;
+    ((intField*)f)->val = *(int*)src;
 }
 
 // stampa l'int
 void intFieldPrint(const field* f) {
-	printf("%s (Integer): %d", f->name, ((intField*)f)->val);
+    printf("%s (Integer): %d", f->name, ((intField*)f)->val);
 }
 
 fieldVtable intFieldVtable = { 
-	.read  = intRead,		  
-	.write = intWrite,		 
-	.print = intFieldPrint,	
-	.gui   = intFieldGui,	  
+    .read  = intRead,          
+    .write = intWrite,         
+    .print = intFieldPrint,    
+    .gui   = intFieldGui,      
 };
 
 field* intNew(const char* name) {
-	ALLOC_FIELD(int) // questo semplicemente alloca l'intField
-	f->val = 0;
+    ALLOC_FIELD(int) // questo semplicemente alloca l'intField
+    f->val = 0;
 
-	return (field*)f;
+    return (field*)f;
 }
 ```
 
@@ -281,26 +281,26 @@ In codice possiamo riassumere come segue:
 ```c
 // singolo rettangolo
 struct quad {
-	float4 pos;
-	float4 uv;
+    float4 pos;
+    float4 uv;
 };
 typedef struct quad quad;
 
 // coda di rettangoli da renderizzare 
 typedef struct {
-	quad vec[QUEUE_SIZ];
-	int last;
+    quad vec[QUEUE_SIZ];
+    int last;
 } guiQueue;
 
 void updateGUI() {
-	guiQueue q = {0};
+    guiQueue q = {0};
 
-	// qui chiamiamo il codice utente
-	codice_utente(&q);
+    // qui chiamiamo il codice utente
+    codice_utente(&q);
 
-	// ora la guiQueue è popolata di rettangoli da disegnare!
-	// inviamo questi rettangoli alla GPU e disegnamoli
-	flushLayer(&q); // chiama codice specifico OpenGL
+    // ora la guiQueue è popolata di rettangoli da disegnare!
+    // inviamo questi rettangoli alla GPU e disegnamoli
+    flushLayer(&q); // chiama codice specifico OpenGL
 }
 ```
 

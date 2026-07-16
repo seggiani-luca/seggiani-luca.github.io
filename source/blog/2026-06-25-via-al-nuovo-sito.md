@@ -19,19 +19,19 @@ clear_dir(stt)
 
 # percorri file sorgente 
 for fr in src.rglob("*"):
-	to = stt / fr.relative_to(src)
+    to = stt / fr.relative_to(src)
 
-	# ricostruisci directory
-	if fr.is_dir():
-		to.mkdir(parents=True, exist_ok=True)
-	
-	else:
-		to.parent.mkdir(parents=True, exist_ok=True)
+    # ricostruisci directory
+    if fr.is_dir():
+        to.mkdir(parents=True, exist_ok=True)
+    
+    else:
+        to.parent.mkdir(parents=True, exist_ok=True)
  
-		# converti file a HTML
-		proc = process(fr)
-		to = to.with_suffix(".html")
-		to.write_text(proc, encoding="utf-8")
+        # converti file a HTML
+        proc = process(fr)
+        to = to.with_suffix(".html")
+        to.write_text(proc, encoding="utf-8")
 ```
 
 L'idea è di avere 2 directory separate:

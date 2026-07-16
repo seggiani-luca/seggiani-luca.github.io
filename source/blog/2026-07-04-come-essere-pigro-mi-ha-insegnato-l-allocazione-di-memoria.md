@@ -37,13 +37,13 @@ Questo si sposa perfettamente con l'emulatore, in quanto nello spazio di memoria
 
 Mi ero lasciato dei commenti nel codice dell'emulatore che dettagliano questa cosa:
 ```Java
-	// expected program headers are:
-	// 0) riscv attributes (ignored)
-	// 1) text + rodata
-	// 2) data (to be loaded in RAM by _start routine)
-	// 3) bss (ignored)
-	// 4) video (ignored)
-	// 5) gnu stack (ignored)
+    // expected program headers are:
+    // 0) riscv attributes (ignored)
+    // 1) text + rodata
+    // 2) data (to be loaded in RAM by _start routine)
+    // 3) bss (ignored)
+    // 4) video (ignored)
+    // 5) gnu stack (ignored)
 ```
 
 Vediamo che abbiamo diversi *segmenti* (non sezioni), organizzati per essere caricati direttamente nelle regioni di memoria che ci interessavano.
@@ -61,32 +61,32 @@ La routine del punto 4., in codice assembly RISC-V, ha il seguente aspetto:
 .extern check_disk 
 .global _start
 
-	# routine di avvio
+    # routine di avvio
 _start:
 
-	# qui si inizializza lo stack
-	la sp, __stack_top
+    # qui si inizializza lo stack
+    la sp, __stack_top
 
-	# qui iniziamo a copiare .data in RAM 
-	la a0, __data_ram_start
-	la a1, __data_ram_end
-	la a2, __data_eprom_start
+    # qui iniziamo a copiare .data in RAM 
+    la a0, __data_ram_start
+    la a1, __data_ram_end
+    la a2, __data_eprom_start
 
-	# questo e' il loop di copia, byte per byte 
+    # questo e' il loop di copia, byte per byte 
 _data_cpy_loop:
-	beq a0, a1, _data_cpy_end
-	
-	lb t0, 0(a2)
-	sb t0, 0(a0)
+    beq a0, a1, _data_cpy_end
+    
+    lb t0, 0(a2)
+    sb t0, 0(a0)
 
-	addi a0, a0, 1
-	addi a2, a2, 1
-	j _data_cpy_loop
+    addi a0, a0, 1
+    addi a2, a2, 1
+    j _data_cpy_loop
 
 _data_cpy_end:
 
-	# qui saltiamo all'entry point! 
-	call main 
+    # qui saltiamo all'entry point! 
+    call main 
 ```
 
 Tutto questo discorso era per dire che, se negli header relativi ad ogni applicazione dichiariamo le nostre variabili statiche, il compilatore felicemente metterà da parte la memoria necessaria nel segmento `.data`, che dovrà essere disponibile in RAM!
@@ -112,13 +112,13 @@ Prendiamo l'applicazione X.
 Con un heap, il suo ciclo di vita potrebbe essere:
 ```c
 int app_main() {
-	void* mem = malloc(QUANTO_BASTA);
+    void* mem = malloc(QUANTO_BASTA);
 
-	// ...
+    // ...
 
-	free(mem);
+    free(mem);
 
-	return 0;
+    return 0;
 }
 ```
 
@@ -134,13 +134,13 @@ Questo è esattamente il caso in cui ci troviamo: quando chiamiamo un'applicazio
 Il nostro codice diventa quindi:
 ```c
 int app_main() {
-	uint8_t mem[QUANTO_BASTA];
+    uint8_t mem[QUANTO_BASTA];
 
-	// ...
+    // ...
 
-	return 0;
+    return 0;
 
-	// usciti dal frame la memoria viene deallocata!
+    // usciti dal frame la memoria viene deallocata!
 }
 ```
 
@@ -154,15 +154,15 @@ Una cosa di cui non mi volevo privare erano le variabili globali, per cui, a cos
 uint8_t* mem;
 
 int app_main() {
-	// qui la alloco
-	uint8_t _mem[QUANTO_BASTA];
-	mem = _mem;
+    // qui la alloco
+    uint8_t _mem[QUANTO_BASTA];
+    mem = _mem;
 
-	// ...
+    // ...
 
-	return 0;
+    return 0;
 
-	// usciti dal frame la memoria viene deallocata!
+    // usciti dal frame la memoria viene deallocata!
 }
 ```
 
@@ -199,24 +199,24 @@ Questo è concesso dal fatto che i token sono fatti per essere piccoli.
 Proprio per il fatto che sono piccoli, vediamo come trattiamo i token:
 ```c
 struct token {
-	tok_type type;
+    tok_type type;
 
-	union {
-		// variabili
-		char var;
+    union {
+        // variabili
+        char var;
 
-		// operatori
-		op_type op;
+        // operatori
+        op_type op;
 
-		// letterali numero
-		int num;
+        // letterali numero
+        int num;
 
-		// parole chiave
-		key_type key;
-		
-		// stringhe
-		char* str;
-	} payload;
+        // parole chiave
+        key_type key;
+        
+        // stringhe
+        char* str;
+    } payload;
 }
 ```
 
@@ -236,11 +236,11 @@ int cur_string = 0;
 
 // allocatore delle stringhe
 char* alloc_string() {
-	// controlla di non essere in fondo
-	if(cur_string == MAX_STRINGS) return NULL;
+    // controlla di non essere in fondo
+    if(cur_string == MAX_STRINGS) return NULL;
 
-	// semplicemente, alloca la prossima
-	return strings[cur_string++];
+    // semplicemente, alloca la prossima
+    return strings[cur_string++];
 }
 ```
 
@@ -270,8 +270,8 @@ L'idea in codice è:
 // un pezzo di corda
 #define PIECE_SIZE 32
 struct piece {
-	char buf[PIECE_SIZE];
-	piece* next;
+    char buf[PIECE_SIZE];
+    piece* next;
 };
 
 // array di linee
@@ -303,20 +303,20 @@ piece* pieces;
 piece* pieces_free;
 
 piece* alloc_piece() {
-	// estrai dalla testa
-	piece* piece = pieces_free;
-	if(piece == NULL) utl::panic("Memoria esaurita");
-	
-	// sposta avanti la lista
-	pieces_free = pieces_free->next;
+    // estrai dalla testa
+    piece* piece = pieces_free;
+    if(piece == NULL) utl::panic("Memoria esaurita");
+    
+    // sposta avanti la lista
+    pieces_free = pieces_free->next;
 
-	return piece;
+    return piece;
 }
 
 void free_piece(piece* piece) {
-	// inserisci in testa 
-	piece->next = pieces_free;
-	pieces_free = piece;	
+    // inserisci in testa 
+    piece->next = pieces_free;
+    pieces_free = piece;    
 }
 ```
 
