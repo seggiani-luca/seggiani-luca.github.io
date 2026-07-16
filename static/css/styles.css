@@ -2,15 +2,15 @@
     /* colors */
 	--page-bg:   #142038;
 	--header-bg: #15233d;
-	--table-bg:  #344a6f;
-	--code-bg:   #2e4161;
+	--table-bg:  #243a5f;
+	--code-bg:   #1e3151;
 
 	--link:      #b7e0ff;
 
 	--accent0:   #ffd166;
 	--accent1:   #ff7a00;
 
-	--fg:        #ffffff;
+	--fg:        #cddae7;
    
 	/* fonts */
 	--mono: monospace;
@@ -83,6 +83,7 @@ nav ul {
 
 	background-color: var(--header-bg);
 	box-shadow: 0 0 1px var(--link);
+	border-radius: .25rem;
 
 	list-style: none;
 	
@@ -105,6 +106,7 @@ main {
 	box-shadow: 0 0 1px var(--link);
 	border: solid 5px var(--header-bg);
 	border-top: none;
+	border-radius: .25rem;
 }
 
 p {
@@ -208,6 +210,7 @@ footer {
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
+	margin-bottom: 5px;
 }
 
 .badges a img {
@@ -239,4 +242,15 @@ footer {
 .comment {
 	color: lightgray;
 	font-style: italic;
+}
+
+/* comments */
+
+.giscus, .giscus-frame {
+	width: 99%;
+}
+
+.giscus {
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
