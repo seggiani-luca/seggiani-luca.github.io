@@ -1,6 +1,10 @@
 # Micro Sim
 Un emulatore per un sistema basato su [RISC-V](https://github.com/seggiani-luca/micro-sim/blob/main/riscv.org).
 
+La **documentazione** è disponibile ai seguenti link:
+- Per l'emulatore in sé per sé (scritto in Java), [qui](https://seggiani-luca.github.io/micro-sim/apidocs/);
+- Per il firmware di sistema (scritto in C++), [qui](https://seggiani-luca.github.io/micro-sim/html/index.html).
+
 ![hello-world](/pics/micro-sim/filesystem_term.png)
 
 Visualizzazione di un file system 

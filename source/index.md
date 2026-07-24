@@ -12,7 +12,7 @@ Lo uso per raccogliere cose che ho fatto, fra cui:
 
 Ho raccolto alcuni dei miei [progetti](/progetti.html) più significativi, con allegate le relative documentazioni.
 
-{{ create_list progetti 0 True}}
+{{ create_list progetti 0 True }}
 
 ## Blog
 
