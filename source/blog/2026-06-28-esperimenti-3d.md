@@ -1,4 +1,11 @@
+<!-- Rudimentali fotocamere digitali. -->
+<!-- Come disegnare con la matematica. -->
+<!-- Contiene matrici di rotazione. -->
+
 # 2026 06 28 esperimenti 3d
+{{ page_blurb }}
+{{ estimate_time }}
+
 Da un po' di tempo sono interessato allo sviluppo di motori grafici.
 Questo perché ho avuto un po' di esperienza con [Unity](https://unity.com/) (ad esempio [qui](/progetti/unity-cities.html)), e prima o poi era chiaro che mi sarebbe venuto voglia di provare a reimplementare qualcosa del genere.
 

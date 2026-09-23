@@ -1,4 +1,9 @@
-# 2026 07 04 Come essere pigro mi ha insegnato l'allocazione di memoria
+<!-- Arene e heap. -->
+<!-- Come abusare del linker. -->
+
+# 2026 07 04 Pigrizia e allocazione di memoria
+{{ page_blurb }}
+{{ estimate_time }}
 
 Ho scritto la mia tesi di laurea triennale sull'estensione dispositivo [ATA](https://en.wikipedia.org/wiki/Parallel_ATA) per l'emulatore [micro-sim](/progetti/micro-sim.html).
 Prima o poi metterò il link alla tesi qui da qualche parte, ma per la cosa di cui voglio parlare oggi non serve.

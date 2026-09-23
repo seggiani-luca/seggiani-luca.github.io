@@ -1,4 +1,10 @@
+<!-- A volte la risposta è 3.1415. --> 
+<!-- Happiness is triangular matrices. -->
+
 # Appunti di Calcolo Numerico
+{{ page_blurb }}
+{{ estimate_time }}
+
 Sono disponibili:
 - [Appunti](https://raw.githubusercontent.com/seggiani-luca/appunti-num/289266b41e999abdea4da5ecac737166b4ea756c/master/master.pdf);
 - Relativo [codice C++](https://github.com/seggiani-luca/appunti-num/tree/main/code/cpp);

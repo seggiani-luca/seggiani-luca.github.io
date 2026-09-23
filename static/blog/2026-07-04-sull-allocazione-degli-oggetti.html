@@ -28,7 +28,17 @@
 </ul>
 </nav>
 <main>
+<!-- Un'idea sugli ECS. -->
+<!-- ECS ma in piccolo. -->
+<!-- Oggetti JavaScript applicati al 3D -->
 <h1>2026 07 04 Sull'allocazione degli oggetti</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["Un'idea sugli ECS.", "ECS ma in piccolo.", "Oggetti JavaScript applicati al 3D"];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>8 min</p>
 <p>Qualche giorno fa ho scritto qualcosa sul rendering <a href="/blog/2026-06-28-esperimenti-3d.html">3D</a> e su <a href="2026-06-30-fare-3d-con-opengl.html">OpenGL</a>.
 Con l'idea di trasformare questo progetto in un motore per videogiochi vero e proprio, oggi voglio passare un po' di tempo a divagare sull'allocazione degli oggetti.
 Il risultato pratico è che ho reimplementato tutto per la terza volta.

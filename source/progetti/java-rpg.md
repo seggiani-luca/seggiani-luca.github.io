@@ -1,4 +1,13 @@
+<!-- Tipo Final Fantasy ma in Java! -->
+<!-- Contiene giochi di parole. -->
+<!-- JavaFX sul client, HTTP sul server. -->
+<!-- La parte divertente è l'architettura distribuita. -->
+<!-- Un piccolo sistema distribuito mascherato da RPG. -->
+
 # Java RPG
+{{ page_blurb }}
+{{ estimate_time }}
+
 Un JRPG distribuito e collaborativo scritto in Java.
 Il nome è un gioco di parole fra "Java RPG" e "Japanese RPG".
 

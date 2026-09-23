@@ -1,4 +1,11 @@
+<!-- Meno rudimentali fotocamere digitali. -->
+<!-- Hai presente glxgears? -->
+<!-- Mesh, shader e materiali -->
+
 # 2026 06 30 fare 3d con opengl
+{{ page_blurb }}
+{{ estimate_time }}
+
 Nello [scorso articolo](/blog/2026-06-28-esperimenti-3d.html) ho parlato della grafica 3D e mostrato l'implementazione di un (semplicissimo) software renderer.
 Alla fine ci eravamo detti che per fare le cose per bene era opportuno usare un'API per l'accelerazione grafica come OpenGL.
 Questo dà diversi vantaggi:

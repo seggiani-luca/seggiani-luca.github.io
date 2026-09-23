@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- prism -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>Prism.plugins.autoloader.languages_path ="https://cdn.jsdelivr.net/npm/prismjs/components/";</script>
+</head>
+<body>
+<header>
+	<a href="/">
+		<h1>Luca Seggiani</h1>
+		<p>appunti - codice - musica</p>
+	</a>
+</header>
+<nav>
+<ul>
+<li><a href=/altro.html>altro</a></li>
+<li><a href=/appunti.html>appunti</a></li>
+<li><a href=/blog.html>blog</a></li>
+<li><a href=/progetti.html>progetti</a></li>
+</ul>
+</nav>
+<main>
+<!-- Unity, in piccolo. -->
+<!-- Una quantità poco ragionevole di infrastruttura costruita a mano. -->
+<!-- (Quasi) tutto da zero. -->
+<!-- Per imparare Unity, devi scrivere Unity. -->
+<h1>render2</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["Unity, in piccolo.", "Una quantit\u00e0 poco ragionevole di infrastruttura costruita a mano.", "(Quasi) tutto da zero.", "Per imparare Unity, devi scrivere Unity."];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>1 min</p>
+<p>Un motore di rendering sperimentale scritto da zero in C, GLAD e GLFW3.
+L'idea originale è di avere compatibilità piena con C99, ma per ora sono rimasto a C11.
+La repository si trova <a href="https://github.com/seggiani-luca/render2">qui</a>.</p>
+<h2>Funzionalità</h2>
+<p>Pipeline di rendering 3D accelerata via OpenGL:</p>
+<ul>
+<li>Programmabile via shader GLSL;</li>
+<li>Con supporto alle mesh in formato <code>.obj</code>, materiali in formato <code>.mtl</code>, e texture in formato <code>.tga</code> senza compressione RLE;</li>
+<li>Tipi dedicati al rendering (telecamere con controlli FOV, near e far plane; oggetti &quot;atmosfera&quot; per i vettori di illuminazione e gli uniform shader).</li>
+</ul>
+<p>Architettura ad entità:</p>
+<ul>
+<li>Sistema flessibile ed estendibile basato su campi polimorfi (<code>field</code>) con vtable dedicate (<code>int</code>, <code>float</code>, <code>float2/3/4</code>, <code>color</code>, <code>string</code>, <code>texture</code>, <code>mesh</code>, <code>material</code>, <code>camera</code>);</li>
+<li>Gerarchia ad albero delle entità con composizione delle trasformazioni.</li>
+</ul>
+<p>Interfaccia utente grafica:</p>
+<ul>
+<li>Editor visuale renderizzato direttamente via OpenGL: vista scena, gerarchia ed ispettore;</li>
+<li>Motore di rendering della GUI dedicato.</li>
+</ul>
+<p>Serializzazione delle scene:</p>
+<ul>
+<li>Parser e serializer JSON dedicato per il salvataggio e caricamento dello stato delle scene.</li>
+</ul>
+<p>L'intero progetto è stato sviluppato con l'obiettivo di essere il più educativo possibile:</p>
+<ul>
+<li>Tutto è sviluppato da zero, in modo da mostrare come funziona ogni passo dello sviluppo di un motore grafico;</li>
+<li>Le soluzioni adottate sono standard e (idealmente) semplici da capire per chi ha un po' di familiarità con altri motori (come Unity);</li>
+<li>Il motore è stato sviluppato per essere versatile e gestire progetti di vario tipo.</li>
+</ul>
+<h2>Requisiti di Sistema</h2>
+<p>Su distribuzioni Linux (Debian/Ubuntu e derivate), puoi installare le dipendenze (GLFW3, OpenGL e libm) con:</p>
+<pre><code>sudo apt update
+sudo apt install build-essential libglfw3-dev libgl1-mesa-dev
+</code></pre>
+<p>Quindi hai bisogno di un compilatore C compatibile almeno con C99 (GCC o Clang).</p>
+<h2>Compilare</h2>
+<p>Per ottenere la repository puoi fare la <code>clone</code>:</p>
+<pre><code class="language-bash">git clone https://github.com/seggiani-luca/render2.git
+</code></pre>
+<p>Quindi c'è un <code>Makefile</code> per compilare tutto:</p>
+<pre><code class="language-bash">make run    # compila il progetto e lo esegue
+make        # compila soltanto
+make debug  # avvia GDB per il debugging, con qualche soppressione abilitata
+make clean  # ripulisce gli oggetti
+</code></pre>
+<h2>Struttura</h2>
+<p>L'idea è che puoi fare la <code>clone</code> dell'intera repository render2, ed usare la directory madre come base per il tuo progetto.</p>
+<p>L'organizzazione che è stata adottata in fase di sviluppo è la seguente:</p>
+<pre><code>├── dat                # asset (texture, mesh, ecc...)
+│   ├── icon           # icone delle finestre
+│   ├── material       # materiali (.mtl)
+│   ├── model          # modelli (.obj)
+│   ├── scene          # scene serializzate (.json)
+│   ├── shader         # shader frag e vert (.glsl)
+│   └── texture        # texture (.tga senza RLE)
+├── lib/glad           # libreria GLAD
+├── src                # codice sorgente
+│   ├── data           # caricamento di dati dal disco, tabelle dei riferimenti
+│   │   ├── material   # caricamento e decodifica materiali
+│   │   ├── mesh       # caricamento e decodifica mesh, upload alla GPU
+│   │   ├── shader     # caricamento e decodifica shader, compilazione
+│   │   └── texture    # caricamento e decodifica texture
+│   ├── gui            # toolkit GUI dedicato
+│   │   ├── hierarchy  # GUI della gerarchia
+│   │   ├── inspector  # GUI dell'ispettore
+│   │   ├── render     # backend della GUI, rendering su superfici OpenGL e input
+│   │   └── widget     # toolkit di widget di default
+│   ├── math           # libreria di algebra lineare dedicata
+│   ├── render         # rendering delle entità
+│   ├── scene          # gestione delle scene (grafi di entità)
+│   │   └── entity     # definizione di entità con campi polimorfi
+│   ├── serial         # serializzazione e deserializzazione di scene
+│   │   └── json       # motore di serializzazione e deserializzazione JSON dedicato
+│   └── window         # adattatore su GLFW per le finestre
+└── tst                # soppressioni GDB, test vari
+</code></pre>
+</main>
+<footer>
+	<script src="https://giscus.app/client.js"
+			data-repo="seggiani-luca/seggiani-luca.github.io"
+			data-repo-id="R_kgDOP2TEAQ"
+			data-category="Announcements"
+			data-category-id="DIC_kwDOP2TEAc4DBWu5"
+			data-mapping="pathname"
+			data-strict="0"
+			data-reactions-enabled="0"
+			data-emit-metadata="0"
+			data-input-position="top"
+			data-theme="dark_dimmed"
+			data-lang="it"
+			crossorigin="anonymous"
+			async>
+	</script>
+	<p>Luca Seggiani - 2026</p>
+</footer>
+</body>

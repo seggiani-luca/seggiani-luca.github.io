@@ -1,4 +1,11 @@
+<!-- NoSQL è meglio. -->
+<!-- PostgreSQL è meglio. -->
+<!-- Dipendenze funzionali. -->
+
 # Appunti di Basi di Dati
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sul [testo](https://atzeni.inf.uniroma3.it/libroBD/index.html) del professor Atzeni (ISBN 978-88-386-6587-5).
 
 Sono disponibili:

@@ -1,4 +1,11 @@
+<!-- Come costruire un computer in Verilog -->
+<!-- Come fare (peggio) il lavoro del compilatore. -->
+<!-- REP MOVSB. -->
+
 # Appunti di Reti Logiche
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sull'(ottimo) [testo](https://www.edizioniets.com/scheda.asp?n=9788846759351) del professor Corsini (ISBN 978-88-46759351).
 
 Sono disponibili:

@@ -1,4 +1,10 @@
+<!-- L'arte di far fare meno lavoro ai computer. -->
+<!-- Ricordati O, Omega e Theta. --> 
+
 # Appunti di Algoritmi e Strutture Dati
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sul [testo](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) del Cormen (ISBN 978-0-262-04630-5). 
 
 Sono disponibili:

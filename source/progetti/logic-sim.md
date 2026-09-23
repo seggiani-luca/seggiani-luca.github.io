@@ -1,4 +1,13 @@
+<!-- Algebra booleana digeribile. -->
+<!-- Per costruire circuiti senza saldatore. -->
+<!-- Dalle porte AND OR NOT al sistema calcolatore. -->
+<!-- Ci sono anche i latch! --> 
+
+
 # Logic Sim
+{{ page_blurb }}
+{{ estimate_time }}
+
 Un editor di circuiti e simulatore logico scritto in JavaScript.
 
 Sono disponibili una [versione statica](https://seggiani-luca.github.io/logic-sim/) da provare nel browser, e la [repository](https://github.com/seggiani-luca/logic-sim).

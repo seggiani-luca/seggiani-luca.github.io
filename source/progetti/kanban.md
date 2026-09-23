@@ -1,4 +1,12 @@
+<!-- Fatto apposta per essere letto dagli umani. -->
+<!-- Niente heap e un thread solo. -->
+<!-- Un thread and constantly multiplexing! -->
+<!-- TCP e UDP sulla stessa porta? -->
+
 # Kanban
+{{ page_blurb }}
+{{ estimate_time }}
+
 Server e client per un protocollo scritto in C, che realizza il metodo di gestione del lavoro basato su **kanban**
 
 Sono disponibili i sorgenti del client e del server nella [repository](https://github.com/seggiani-luca/kanban).

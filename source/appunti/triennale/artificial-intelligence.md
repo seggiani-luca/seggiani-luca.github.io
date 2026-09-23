@@ -1,4 +1,10 @@
+<!-- Attenzione! Appunti incompleti. -->
+<!-- Dalla logica proposizionale a ChatGPT. -->
+
 # Appunti di Artificial Intelligence
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sul [testo](https://aima.cs.berkeley.edu/) di Russell, Norvig (ISBN 0-13-461099-7).
 
 Sono disponibili:

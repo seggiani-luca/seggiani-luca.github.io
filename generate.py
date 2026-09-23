@@ -1,3 +1,8 @@
+import re
+import random
+import json
+import inspect
+
 # ---- markdown renderer
 
 from markdown_it import MarkdownIt
@@ -24,6 +29,27 @@ head = thm / "head.html"
 header = thm / "header.html"
 footer = thm / "footer.html"
 
+# ---- utilities
+
+comment = re.compile(r"^\s*<!--\s*(.*?)\s*-->\s*$")
+def get_blurb(file):
+    blurbs = []
+
+    for line in file.splitlines():
+        m = comment.match(line)
+        if m:
+            blurbs.append(m.group(1))
+
+    if not blurbs:
+        return "Se stai leggendo questo, ho fatto casino"
+
+    # use a rando one
+    return f"""<script>
+(() => {{
+    const blurbs = {json.dumps(blurbs)};
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+}})();
+</script>"""
 
 # ---- element macros
 
@@ -35,22 +61,23 @@ def create_title(nam):
     return " ".join(words)
 
 # creates a list 
-def create_list(dr, n=0, rec=False):
+def create_list(dr, number=0, recurse=False, blurb=False):
     # directory relative to source
     dr = src / dr
 
     res = "<ul>\n"
 
     # recurse or not?
-    if rec:
+    recurse = bool(recurse)
+    if recurse:
         lst = dr.rglob("*")
     else:
         lst = dr.glob("*")
     
     # last n or all?
-    n = int(n)
-    if n != 0:
-        lst = sorted(lst, reverse=True)[0:n]
+    number = int(number)
+    if number != 0:
+        lst = sorted(lst, reverse=True)[0:number]
     else:
         lst = sorted(lst)
 
@@ -66,7 +93,14 @@ def create_list(dr, n=0, rec=False):
         # insert in list
         rel = "/" + str(fr.with_suffix(".html").relative_to(src))
         nam = create_title(fr.stem) 
-        res += f"<li><a href={rel}>{nam}</a></li>\n"
+        res += f"<li><a href={rel}>{nam}</a>"
+
+        # optional blurb
+        if blurb:
+            blurb_text = get_blurb(fr.read_text())
+            res += f"<p class=blurb>{blurb_text}</p>"
+
+        res += "</li>\n"
 
     res += "</ul>\n"
     return res
@@ -81,21 +115,61 @@ def create_nav():
     res += "</nav>\n"
     return res
 
+# outputs a random page blurb
+def page_blurb(file):
+    blurb = get_blurb(file)
+    return f"<p class=subtitle>{blurb}</p>"
+
+# estimates page read time
+def estimate_time(file):
+    # average words per minute
+    wpm = 225
+
+    # count words
+    file = re.sub(r"```.*?```", "", file, flags=re.DOTALL)
+    file = re.sub(r"<!--.*?-->", "", file, flags=re.DOTALL)
+    words = len(re.findall(r"\b[\wÀ-ÿ]+\b", file))
+
+    # estimate minutes
+    minutes = words / wpm
+
+    res = "<p class=estimate>"
+
+    if minutes < 1:
+        res += "< 1 min"
+    else:
+        res += f"{round(minutes)} min"
+
+    res += "</p>\n"
+    return res
 
 # ---- generation logic
-
-import re
 
 # preprocesses a markdown file, expanding macros
 pattern = re.compile(r"\{\{\s*(\w+)\s+(.*?)\s*\}\}")
 def preprocess(md):
     def repl(match):
-        # get function and args
-        fun = match.group(1)
-        args = match.group(2).split()
+        # get function, kwargs and args
+        fun_str = match.group(1)
+        args = []
+        kwargs = {}
 
-        # call macro
-        return globals()[fun](*args)
+        # match kwargs and args
+        for arg in match.group(2).split():
+            if "=" in arg:
+                key, value = arg.split("=", 1)
+                kwargs[key] = value
+            else:
+                args.append(arg)
+
+        # get function
+        fun = globals()[fun_str]
+
+        # constants
+        if "file" in inspect.signature(fun).parameters:
+            kwargs["file"] = md
+
+        return fun(*args, **kwargs)
     
     return pattern.sub(repl, md)
 

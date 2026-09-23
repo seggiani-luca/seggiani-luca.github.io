@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- prism -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>Prism.plugins.autoloader.languages_path ="https://cdn.jsdelivr.net/npm/prismjs/components/";</script>
+</head>
+<body>
+<header>
+	<a href="/">
+		<h1>Luca Seggiani</h1>
+		<p>appunti - codice - musica</p>
+	</a>
+</header>
+<nav>
+<ul>
+<li><a href=/altro.html>altro</a></li>
+<li><a href=/appunti.html>appunti</a></li>
+<li><a href=/blog.html>blog</a></li>
+<li><a href=/progetti.html>progetti</a></li>
+</ul>
+</nav>
+<main>
+<!-- Unity, in piccolo. -->
+<!-- Una quantità poco ragionevole di infrastruttura costruita a mano. -->
+<!-- (Quasi) tutto da zero. -->
+<!-- Per imparare Unity, devi scrivere Unity. -->
+<!-- Presente quell'idea sugli ECS? -->
+<h1>Introduzione a render2</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["Unity, in piccolo.", "Una quantit\u00e0 poco ragionevole di infrastruttura costruita a mano.", "(Quasi) tutto da zero.", "Per imparare Unity, devi scrivere Unity.", "Presente quell'idea sugli ECS?"];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>14 min</p>
+<p>Un po' di tempo fa ho scritto <a href="/blog/2026-06-28-sull-allocazione-degli-oggetti.html">questo</a> articolo su un sistema per la gestione di oggetti polimorfi, simile ad un ECS, improntato allo sviluppo di motori grafici e/o per videogiochi.
+Ho approfondito l'idea, sviluppato un po' di sistemi, e il risultato è disponibile a <a href="https://github.com/seggiani-luca/render2">questa</a> repository.
+Ho scritto anche una <a href="/progetti/render2.html">pagina</a> che dettaglia il progetto (ho copia-incollato il <code>README.md</code>, non aspettatevi molto).</p>
+<p>Il nome del progetto è <strong>render2</strong>.
+Se avete letto gli scorsi articoli, avrete notato che questa è la terza volta che ricomincio questo progetto da capo.
+Quindi, i programmatori iniziano a contare da 0, per cui render <em>2</em>.</p>
+<h2>Che cos'è?</h2>
+<p>L'idea dello scorso articolo era di avere <strong>entità</strong>, cioè oggetti rappresentati come una semplice lista di campi di qualsiasi tipo.
+Mesh, materiale, trasformazione o qualsiasi altro parametro: tutto diventa un campo.
+Questo mi semplifica di molto la vita dal punto di vista implementativo, in quanto bastava scrivere le sole funzioni che agivano sui campi, ed incollarle insieme per gestire oggetti arbitrariamente complessi.
+Avevo quindi la semplice implementazione dell'entità:</p>
+<pre><code class="language-c">// entity data
+struct entity {
+	// name of entity
+	char name[ENT_NAME_SIZ];
+
+	// root of field list
+	field* root;
+
+	// number of fields
+	int fieldCount;
+
+	// parent of this entity (NULL for root)
+	struct entity* parent;
+
+	// direct children of this entity
+	struct entity* child;
+
+	// next peer of this entity
+	struct entity* peer;
+
+	// number of children
+	int childCount;
+};
+typedef struct entity entity;
+</code></pre>
+<p>e un'altrettanto semplice GUI per la gestione degli oggetti, che mi aveva dimostrato che l'approccio poteva funzionare.
+Questi oggetti, poi, potevano essere organizzati in scene (lo si vede dal codice sopra, lo <code>struct</code> ha un po' di stato riguardo alla gerarchia):</p>
+<pre><code class="language-c">// a scene is just an entity hierarchy
+struct scene {
+	// scene name
+	char name[ENT_NAME_SIZ];
+
+	// root of scene hierarchy
+	entity root;
+
+    // here be dragons!
+
+	// rendering state
+	renderScene render;
+
+	// dirty flag
+	int dirty;
+};
+typedef struct scene scene;
+</code></pre>
+<p>Il prossimo passo era chiaramente quello di attaccare un sistema più complesso a questi oggetti, che altrimenti risultavano inutili.
+Il codice sopra dovrebbe dare qualche indizio su quale sistema ho scelto di implementare per primo: per un motore di rendering un buon inizio è, sorpresa, <em>renderizzare</em> gli oggetti.
+Chi se lo sarebbe aspettato.</p>
+<h2>Come?</h2>
+<p>Nell'articolo su <a href="/blog/2026-06-30-fare-3d-con-opengl.html">OpenGL</a>, e anche nel <a href="2026-06-28-esperimenti-3d.html">precedente</a>, ho parlato del rendering 3D in generale.
+Eravamo arrivati alla conclusione che ci servivano:</p>
+<ul>
+<li>Delle <code>mesh</code>, cioè buffer di vertici, normali, e altre informazioni geometriche sugli oggetti da disegnare;</li>
+<li><code>texture</code>, cioè mappe che venivano applicate alle mesh per determinare il loro colore;</li>
+<li><code>shader</code>, ovvero piccoli programmi che venivano eseguiti sulle mesh per renderizzarle effettivamente nello spazio schermo;</li>
+<li><code>material</code> che raggruppavano texture e shader, assieme ai loro parametri, in unità compatte da assegnare alle <code>mesh</code>.</li>
+</ul>
+<p>Questa idea si sposa perfettamente con le entità: ognuno di questi oggetti può essere un <em>campo</em>, associato alle rispettive informazioni.
+Anzi, abbiamo bisogno solo di una <code>mesh</code> e di un <code>material</code> per renderizzare un oggetto, in quanto abbiamo detto <code>texture</code> e <code>shader</code> sono racchiuse nel <code>material</code> stesso.</p>
+<p>In verità, però, vediamo che  ci sono alcune complicazioni che dobbiamo ancora gestire.</p>
+<h3>Dove sono gli oggetti?</h3>
+<p>Nulla di un oggetto ci dice, di per sé, dove questo oggetto si trova: è una conseguenza naturale dell'assegnare tutto ai campi che lo compongono.
+Questo, però, risulta abbastanza importante da sapere quanto si vuole renderizzare l'oggetto sullo schermo.
+Basta quindi dotarsi di un ulteriore campo, il campo <code>transform</code>, che ne determina la trasformazione.</p>
+<p>Si potrebbe parlare a lungo delle trasformazioni.
+Cercando di essere sintetici, abbiamo che ci serve:</p>
+<ul>
+<li>La posizione dell'oggetto (semplice);</li>
+<li>La sua rotazione (molto meno semplice);</li>
+<li>La sua scala, cioè quanto l'oggetto viene &quot;dilatato&quot; in ogni asse.</li>
+</ul>
+<p>Le rotazioni sono particolarmente complesse in quanto, al contrario delle altre 2 informazioni, non basta un vettore tridimensionale a rappresentarle.
+Non ricordo se ne ho già parlato in profondità, ma su <a href="https://en.wikipedia.org/wiki/Gimbal_lock">Wikipedia</a> ci sono spiegazioni.
+L'idea è che soli 3 gradi di libertà non riescono a rappresentare univocamente lo spazio di trasformazioni tridimensionali (isomorfo allo spazio delle matrici di rotazione).
+Finché le cose stanno ferme ce la si può cavare con gli <a href="https://it.wikipedia.org/wiki/Angoli_di_Eulero">angoli di eulero</a>, ma nel caso di applicazioni interattive come i <em>videogiochi</em>, le cose si rompono molto velocemente.</p>
+<p>La soluzione è quindi da oggetti matematici molto paurosi detti <a href="https://it.wikipedia.org/wiki/Quaternione">quaternioni</a>.
+Non mi dilungherò sulla teoria dei quaternioni (anche perché non la capisco), ma mi limiterò a dire che possiamo vederli come vettori quadridimensionali.
+Di questi 4 numeri, 3 rappresenteranno l'<em>asse</em> di rotazione, e il rimanente l'<em>angolo</em> (o circa) attorno a quell'asse.
+Comunque, nell'header <code>math.h</code> della repo ci sono tutte le funzioni.
+Probabilmente si fa prima a studiare quelle.</p>
+<p>Il risultato è il seguente <code>struct</code>:</p>
+<pre><code class="language-c">// definition of transform
+typedef struct {
+	// position
+	float3 position;
+
+	// rotation
+	quat rotation; // praticamente, typedef vec4 quat ...
+
+	// scale
+	float3 scale;
+} transform;
+</code></pre>
+<h3>Da dove si parte</h3>
+<p>Una volta che abbiamo le nostre entità in ordine, con <code>transform</code>, <code>mesh</code> e <code>material</code>, vogliamo effettivamente disegnarle su un framebuffer.</p>
+<p><img src="/pics/blog/renderable_entity.png" alt="entità renderizzabile" /></p>
+<p>Un entità pronta ad essere renderizzata</p>
+<p>Iniziamo col fare un po' d'ordine.
+Queste entità stanno in una scena: possono essere figlie di altre entità, ecc...
+Le scene sono grafi aclici diretti, per cui l'algoritmo è semplice:</p>
+<ol>
+<li>Percorriamo l'intero grafo della scena;</li>
+<li>Per ogni entità renderizzabile trovata, la renderizziamo.</li>
+</ol>
+<p>Il processo di rendering è banale consultati gli scorsi articoli sul rendering (ho fatto alcuni aggiornamenti ai materiali e alle shader, ma nulla che non sia coerente con quanto altri motori già fanno).</p>
+<p>L'idea interessante è che non tutte le entità sono di per sé renderizzabili.
+Anzi, mi è venuto in mente che avere entità senza trasformazioni, o con trasformazioni ma senza campi <code>mesh</code> e <code>material</code>, potevano tornare utili a diversi scopi:</p>
+<ul>
+<li>Entità senza <code>transform</code>: non occupa una posizione nello spazio e può quindi fungere da nodo puramente logico. Può essere utilizzata, per esempio, come controller invisibile, contenitore semantico o punto di organizzazione per un insieme di entità figlie. La sua presenza nella gerarchia non introduce alcun effetto geometrico.</li>
+<li>Entità con <code>transform</code> ma senza <code>mesh</code>/<code>material</code>: rappresenta invece un vero e proprio riferimento spaziale. Non viene renderizzata, ma possiede una posizione, orientazione e scala proprie. Questo la rende utile per punti di aggancio, pivot, socket, bones semplificati o, più in generale, per costruire strutture meccaniche attraverso la gerarchia.</li>
+</ul>
+<h3>Composizioni spaziali</h3>
+<p>A proposito di quest'ultimo punto, noto che ho finalmente implementato la corretta <em>composizione</em> delle trasformazioni.
+Questo è particolarmente interessante perché permette di sfruttare la gerarchia delle entità come un sistema di <em>composizione spaziale</em>.
+Un'entità può definire un sistema di coordinate locale e le sue figlie possono definire ulteriori trasformazioni relative a quel sistema.</p>
+<p>Per esempio, si può avere:</p>
+<pre><code>robot
+└── torso
+    ├── arm
+    │   └── forearm
+    │       └── hand
+    └── head
+</code></pre>
+<p>dove <code>robot</code>, <code>torso</code>, <code>arm</code> e <code>forearm`` potrebbero essere semplicemente entità dotate di </code>transform<code>, mentre solo alcune foglie possiedono effettivamente </code>mesh<code>e</code>material`.
+La cosa importante è che la trasformazione della figlia non viene interpretata nello spazio globale, ma nello spazio locale del padre.
+In termini matriciali, si moltiplica la trasformazione della figlia per quella del padre.
+Quindi, se il padre ruota, anche il sistema di riferimento della figlia ruota con esso.
+Una figlia che ha, ad esempio, una traslazione locale lungo l'asse X, continuerà a essere a +X rispetto al padre, non rispetto al mondo.
+Così si rappresentano velocemente strutture meccaniche come quella riportata sopra (un semplice braccio meccanico).</p>
+<h3>Liste di rendering</h3>
+<p>Un ottimizzazione che si può fare, nel contesto di entità così variegate, è quella di realizzare a partire dal grafo delle scene, una rappresentazione semplificata che chiamo <em>lista di rendering</em>.
+La lista di rendering è una versione &quot;appiattita&quot; della scena contenente i soli oggetti renderizzabili, e le loro trasformazioni già composte.</p>
+<p>La realizziamo come una lista collegata, associata ad ogni scena:</p>
+<pre><code class="language-c">// an entity, which can be rendered to screen
+struct renderEntity {
+	// entity transformation
+	mat4 transform;
+
+	// mesh of entity
+	mesh* mesh;
+	
+	// material of entity
+	material* material;
+
+	// next render entity in list
+	struct renderEntity* next;
+};
+typedef struct renderEntity renderEntity;
+
+// a rendering view of a scene
+typedef struct {
+	// scene camera
+	struct {
+		// camera field
+		camera* info;
+
+		// camera transform
+		mat4 transform;
+	} camera;
+
+	// scene atmosphere
+	struct {
+		// atmosphere field
+		atmosphere* info;
+		
+		// atmosphere transform
+		mat4 transform;
+	} atmosphere;
+
+	// root of scene hierarchy
+	renderEntity* root;
+} renderScene;
+</code></pre>
+<p>Il rendering risulta quindi banale (basta scorrere la lista).
+Più interessante è come si costruisce la lista di rendering (<code>renderScene</code>)·</p>
+<ul>
+<li>Ha senso compilare la lista di rendering solo quando qualcosa nella scena cambia davvero. Questo si rileva attraverso un apposito flag <code>dirty</code>: se qualcuno modifica la scena, si alza <code>dirty</code>, e da lì in poi il sottosistema di rendering ha il compito di ricompilare la lista;</li>
+<li>Le trasformazioni vengono composte con l'ausilio di uno stack che mantiene, per ogni entità, le trasformazioni delle entità genitore. Queste possono quindi essere composte con una semplice moltiplicazione matriciale. Quando si finisce di consultare le entità figlie di una data entità, quindi, basta risalire nello stack fino al padre dell'entità stessa, e via dicendo. In codice:</li>
+</ul>
+<pre><code class="language-c">// codice di percorrenza del grafo [...]
+
+// calcola la variazione di profondità 
+int depthDelta = it-&gt;base.depth - it-&gt;lastDepth;
+
+// aggiorna lo stack 
+it-&gt;stack.cur += depthDelta;
+if (it-&gt;stack.cur &lt; 0 || it-&gt;stack.cur &gt;= SCN_MAX_DEPTH) return NULL;
+
+// ottieni trasformazione locale 
+field* f = getField(new, REN_TRANSFORM_NAME);
+transform tf;
+if(f) tf = ((transformField*)f)-&gt;val;
+else tf = transformIdent();
+
+// converti la trasformazione in matrice 
+mat4 local = transformToMat4(tf);
+
+// componi la trasformazione con la precedente
+it-&gt;stack.vec[it-&gt;stack.cur] =
+    matMul4(it-&gt;stack.vec[it-&gt;stack.cur - 1], local);
+
+// aggiorna lo stato, in modo da conoscere la variazione di profondità alla
+// prossima iterazione
+it-&gt;lastDepth = it-&gt;base.depth;
+
+// [...]
+</code></pre>
+<h2>Risultati</h2>
+<p>I risultati di questo approccio sono principalmente 2:</p>
+<ul>
+<li>Si ha un modo versatile non solo per rappresentare grafi di scene, ma anche costruzioni geometriche arbitrariamente complesse;</li>
+<li>Si possono disegnare tali costruzioni a schermo ottenendo, anche qui, effetti grafici tanto complessi quanto si è disposti a sviluppare mesh, materiali e shader forniti alle primitive di OpenGL. Assicuro che null'altro è stato aggiunto a quanto detto in <a href="/blog/2026-06-30-fare-3d-con-opengl.html">questo</a> articolo, se non alcune funzionalità di <em>quality-of-life</em> per la gestione di shader e materiali.</li>
+</ul>
+<p>Vediamo quindi un semplice render che sono riuscito a fare in fase di testing:</p>
+<p><img src="/pics/blog/reiko_render.png" alt="reiko nagase su una bisonte" /></p>
+<p>Mai giocato a Ridge Racer?</p>
+<h3>Spiegazioni</h3>
+<p>Ho aggiornato anche la GUI, che dovrebbe risultare più leggibile.</p>
+<ul>
+<li>A sinistra si nota la <em>gerarchia</em>, cioè una rappresentazione grafica della scena. Vediamo che non è altro che un albero n-ario. In particolare, l'automobile è rappresentata dall'entità <em>Bisonte</em>, di cui vediamo sono figlie le entità <em>Body</em> (carrozzeria), e le varie <em>Wheel FR</em>, etc... (le ruote). Anche la signorina sul cofano è figlia dell'entità <em>Bisonte</em>: così se l'automibile ruota, anche lei ruota in maniera solidale;</li>
+<li>Al centro c'è la finestra principale, che mostra il rendering vero e proprio. Si notano alcuni effetti grafici &quot;avanzati&quot;, come la simulazione del cielo, illuminazione ambientale più sofisticata, e materiali che simulano caratteristiche ottiche più complesse come i riflessi sulla vernice dell'automobile, o la colorazione della pelle della signorina;</li>
+<li>A destra c'è il fedele <em>ispettore</em>, che permette di analizzare le entità. Nello screenshot è selezionata l'entità <em>Reiko</em> (la signorina). Si nota come questa è renderizzabile: è dotata di un campo <code>transform</code>, con la sua posizione nello spazio locale all'automobile, un campo <code>mesh</code> con la sua mesh e un campo <code>material</code> col rispettivo materiale.</li>
+</ul>
+<h2>Bonus: approfondimenti sull'esempio</h2>
+<p>La parte spiegata sopra è abbastanza concettosa, per cui voglio alleggerire un po' parlando della scena di prova mostrata sopra.
+L'ispirazione sono i poster promozionali del videogioco <a href="https://en.wikipedia.org/wiki/R4%3A_Ridge_Racer_Type_4">Ridge Racer Type 4</a>, della Namco, per la Playstation 1 (o più precisamente PSX, visto che comprende anche la <em>PS One</em>).
+Ho scelto questo tema in quanto i rendering che venivano realizzati all'epoca erano molto rudimentali, e mi sono reso conto che forse potevo avvicinarmi allo stesso stile con il mio motore altrettanto (se non di più) rudimentale.</p>
+<p>Ciònonostante, c'è stato comunque modo di sperimentare con shader e materiali abbastanza interessanti, per cui vale la pena spendere 2 parole.</p>
+<h3>I modelli</h3>
+<p>Questo è stato il primo progetto di modellazione &quot;seria&quot; che ho fatto con Blender.
+L'idea di modellare un'automobile non mi sembrava poi tanto fuori dal normale.
+Quella di modellare un personaggio umano, invece, mi terrorizzava.</p>
+<p>L'automobile che ho modellato è la <em>Bisonte</em>, che nel gioco è prodotta dal (fittizio) marchio italiano <em>Assoluto</em>.
+Questo è molto particolare, in quanto la linea ricorda più quella di una Ford GT40.
+I giapponesi sono fantasiosi.</p>
+<p><img src="/pics/blog/bisonte.png" alt="bisonte" /></p>
+<p>Bisonte + Reference</p>
+<p>L'approccio che ho usato, non essendo capace a modellare a occhio, e visto che non si trovavano blueprint in rete (cosa che ha senso, in quanto l'automobile non è mai stata costruita nella realtà), è quello di scaricare un modello a bassa risoluzione da sito <a href="https://models.spriters-resource.com/">Modelers Resource</a>.
+Questo sito è ottimo per trovare modelli di vecchi (o nuovi) videogiochi da studiare.
+Mi sembra che io ho preso un modello da un gioco per Nintendo 64.</p>
+<p>Ho quindi usato gli strumenti di Blender per realizzare una versione a risoluzione più alta, tracciandola sul modello originale.
+Quindi ho potuto <em>smussare</em> questo modello attraverso il modificatore <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/generate/subdivision_surface.html">Subdivision Surface</a>, per averlo ancora più liscio.
+Mi è tornato particolarmente lo strumento <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/edge/edge_data.html">Edge Data</a>: selezionando determinati spigoli del modello e digitando <code>Ctrl + E</code> in <em>edit mode</em>, è possibile renderli più &quot;spigolosi&quot;, cioè diminuire l'effetto del modificatore <em>Subdivision Surface</em>.
+Un giorno sarebbe simpatico approfondire come questo modificatore funziona a basso livello.
+Se non sbaglio, ha qualcosa a che fare con l'algoritmo di <a href="https://en.wikipedia.org/wiki/Catmull%E2%80%93Clark_subdivision_surface">Catmull-Clark</a>.</p>
+<p><img src="/pics/blog/bisonte_wires.png" alt="bisonte" /></p>
+<p>Wireframe della Bisonte</p>
+<p>Veniamo alla signorina.
+Il nome è <em>Reiko Nagase</em>, e nel gioco originale fa un po' da <em>cover girl</em> e ombrellina durante le gare.
+Pare che il personaggio abbia avuto un grande successo fra i fan del gioco.
+Non sembra difficile immaginare il perché.</p>
+<p>Essendo questa la prima volta che modellavo un personaggio da zero, ho dovuto fare molte iterazioni.
+La parte più complicata è sicuramente la faccia: basta poco per passare da qualcosa di decente a un alieno dalle proporzioni amorfe.
+La soluzione per me è stata di prendere un modello di riferimento (sempre da<a href="https://models.spriters-resource.com/">Modelers Resource</a>, e studiarmelo a fondo).</p>
+<p><img src="/pics/blog/reiko_faces.png" alt="facce di reiko" /></p>
+<p>Iterazioni su iterazioni</p>
+<p>Il resto del modello è stato molto più semplice.
+Mi sono basato su alcune immagini di riferimento (basta cercare cose come &quot;anime reference&quot; sul Web), e sui tutorial di <a href="https://www.youtube.com/@2amgoodnight">questo</a> artista su YouTube.</p>
+<p><img src="/pics/blog/reiko.png" alt="reiko" /></p>
+<p>Il modello di Reiko finito</p>
+<p>Una parte interessante è come ho messo il personaggio in <em>posa</em> sul cofano dell'automobile.
+Senza dilungarsi sui dettagli, il modo in cui vengono posati (e quindi animati) i modelli tridimensionali è associandogli una <em>armatura</em>.
+Un armatura non è altro che un insieme di <em>ossa</em> virtuali (per cui a volte la chiamiamo <em>scheletro</em>), che sono organizzate esattamente come la nostra scena di prima, a supportare la composizione delle trasformazioni.
+Risulta quindi facile assegnare una determinata posa all'armatura, modificando le trasformazioni delle singole ossa.</p>
+<p>Per riflettere queste trasformazioni sul modello vero e proprio, si estende la rappresentazione dei singoli vertici introducendo una serie di pesi.
+Ognuno di questi pesi rappresenta quanto ogni osso virtuale contribuisce alla trasformazione del vertice.
+In pseudocodice:</p>
+<pre><code class="language-c">// vertex data type (mirrors OpenGL)
+typedef struct {
+	float x, y, z;           // position
+	float u, v;              // UV
+	float nx, ny, nz;        // normal
+    float wights[NUM_BONES]; // weights
+} vertex;
+</code></pre>
+<p>Quindi, basta interpolare linearmente per portare ogni vertice nella posizione data dalle ossa, e i relativi pesi.</p>
+<p>Generare questi pesi è complicato, per cui ho in primo luogo sperimentato con tool automatizzati come <a href="https://www.mixamo.com/">Mixamo</a>, di Adobe.
+Ho avuto scarsi risultati, però, per cui ho preferito usare gli strumenti interni di <a href="https://www.blender.org/features/animation/">rigging</a> di Blender, uniti ad alcune modifiche manuali.</p>
+<p><img src="/pics/blog/reiko_rig.png" alt="armatura reko" /></p>
+<p>L'armatura</p>
+<p>Credo che il risultato sia, per un primo tentativo, soddisfacente.</p>
+<h3>I materiali e le shader</h3>
+<p>Arriviamo infine alla parte più interessante dal punto di vista grafico: i materiali.</p>
+<p>Come avevamo detto, un <code>material</code> raccoglie tutte le informazioni necessarie a descrivere come una <code>mesh</code> deve essere renderizzata.
+Nel caso più semplice, abbiamo quindi:</p>
+<ul>
+<li>Un colore diffuso, cioè il colore &quot;base&quot; dell'oggetto;</li>
+<li>Un colore speculare, che determina il colore dei riflessi;</li>
+<li>Un parametro di <em>shininess</em>, che determina quanto questi riflessi siano concentrati;</li>
+<li>Eventualmente delle texture per modificare localmente ciascuno di questi parametri.</li>
+</ul>
+<p>Il materiale viene poi passato alla shader, che si occupa di combinare queste informazioni con la geometria e con l'illuminazione della scena.</p>
+<p>La shader principale che ho utilizzato è basata su un modello abbastanza semplice di illuminazione.
+Per ogni frammento vengono calcolati la normale alla superficie, la direzione verso la luce e quella verso la telecamera.</p>
+<p>La componente diffusa segue sostanzialmente il modello di <a href="https://en.wikipedia.org/wiki/Lambertian_reflectance">Lambert</a> (che ormai conosciamo bene):</p>
+<pre><code class="language-glsl">float lambertDot = dot(L, N);
+vec3 lambert = max(lambertDot, 0.0) * uSunCol;
+
+vec3 diffuse = albedo * lambert;
+</code></pre>
+<p>In pratica, una superficie rivolta verso la luce riceve più illuminazione, mentre una superficie perpendicolare o rivolta nella direzione opposta ne riceve poca o nulla.</p>
+<p>A questa si aggiunge una componente speculare, calcolata riflettendo la direzione della telecamera rispetto alla normale:</p>
+<pre><code class="language-glsl">vec3 specular =
+    specularCol *
+    uSunCol *
+    step(0.0, lambertDot) *
+    pow(max(dot(R, L), 0.0), specExponent);
+</code></pre>
+<p>Il parametro di <em>shininess</em> viene trasformato in un esponente compreso fra <code>1</code> e <code>256</code>.
+Valori elevati producono riflessi più piccoli e concentrati, mentre valori bassi producono riflessi più larghi.</p>
+<p>Non mi sono però fermato alla sola luce diretta.
+Per evitare che le superfici non direttamente illuminate risultassero completamente nere, ho aggiunto una componente ambientale.</p>
+<p>L'ambiente è rappresentato da una texture equirettangolare, cioè una normale immagine panoramica che rappresenta ciò che circonda l'oggetto.
+Data una direzione nello spazio, posso quindi convertirla nelle coordinate della texture:</p>
+<pre><code class="language-glsl">vec2 enviroUV = dirToEquirectUV(N);
+enviro *= textureLod(uAmbientMap, enviroUV, DIFFUSE_MIP).rgb;
+</code></pre>
+<p>La stessa tecnica viene utilizzata anche per simulare i riflessi dell'ambiente sulla superficie.
+In questo caso si utilizza la direzione riflessa <code>R</code>, e il livello di mipmap viene modificato in funzione della <em>shininess</em>: superfici più lucide producono riflessi più definiti, mentre quelle più opache li sfocano.</p>
+<p>Il risultato finale è quindi una combinazione di illuminazione ambientale, diffusione e riflessione speculare.</p>
+<p>Per la pelle di Reiko ho fatto un ulteriore passo, introducendo una shader specifica.</p>
+<p>La pelle, a differenza di una superficie completamente opaca, lascia penetrare una piccola quantità di luce e la diffonde al suo interno.
+Non ho implementato un vero modello di <em>subsurface scattering</em>, che sarebbe decisamente eccessivo per questo progetto, ma una semplice approssimazione:</p>
+<pre><code class="language-glsl">float scatter =
+    max(0.0, (lambertDot + SUBSURFACE_WRAP) /
+               (1.0 + SUBSURFACE_WRAP));
+
+scatter = pow(1.0 - scatter, SUBSURFACE_EXPONENT);
+
+vec3 subsurf = scatter * uSubsurfCol * uSunCol;
+</code></pre>
+<p>L'idea è quella di permettere alla luce di contribuire anche quando la superficie è orientata lontano dalla sorgente luminosa, simulando in maniera molto approssimativa la luce che attraversa e viene diffusa dalla pelle.</p>
+<p>Ho inoltre utilizzato due componenti speculari con diversa concentrazione.
+Una rappresenta il normale riflesso della superficie, mentre l'altra è più largo e debole, per approssimare il comportamento della pelle.</p>
+<p>Infine, la texture diffusa viene utilizzata anche come maschera alpha per alcuni elementi, come i capelli:</p>
+<pre><code class="language-glsl">if(mapCol.a &lt; CLIP_THRESHOLD)
+    discard;
+</code></pre>
+<p>Non è quindi trasparenza vera e propria: il frammento viene semplicemente eliminato sotto una certa soglia.
+Per il tipo di geometria utilizzata è più che sufficiente.</p>
+<p>Anche il cielo utilizza una tecnica abbastanza semplice.
+Viene renderizzato come una sfera che circonda la scena, ma la sua profondità viene forzata al valore massimo:</p>
+<pre><code class="language-glsl">gl_Position =
+    (uProjection * uView * vec4(aPos, 1.0)).xyww;
+</code></pre>
+<p>In questo modo il cielo rimane sempre dietro a tutti gli altri oggetti.</p>
+<p>La sua posizione nello spazio non è quindi particolarmente importante: quello che ci interessa è soltanto la direzione del vertice rispetto alla telecamera. Questa viene trasformata in coordinate equirettangolari e utilizzata per campionare la texture panoramica.</p>
+<p>Il risultato è una pipeline grafica tutt'altro che fisicamente corretta, ma sufficientemente flessibile da permettermi di ottenere materiali molto diversi partendo dagli stessi componenti di base.
+Lo si vede dalla figura di esempio di prima.</p>
+<h2>Conclusioni</h2>
+<p>Voglio chiudere notando che questo non è assolutamente la fine di questo progetto, e spero nemmeno degli articoli che lo dettagliano.
+Ho fatto diverse altre cose, fra cui un overhaul completo del toolkit grafico, l'implementazione del sistema di serializzazione (noioso) e l'inizio dell'implementazione del sistema di scripting (molto meno noioso).</p>
+<p>Attualmente mi sto concentrando sul ripulire ulteriormente il toolkit grafico, con l'intenzione di renderlo abbastanza maturo da costituire una libreria a sé.
+Questo mi renderebbe molto più facile lo sviluppo del motore, in quanto non dovrei più stare continuamente a risolvere problemi di GUI quando sto lavorando altre cose.</p>
+<p>Purtroppo (o per fortuna) è ricominciata anche l'università.
+Io ho passato molto del tempo libero che ho avuto a lavorare a questo progetto, ma chiaramente da qui in poi il tempo scarseggierà sempre di più (a malapena ho trovato la volontà, anzi la <em>pretesa</em> di scrivere questo articolo).
+Spero quindi di riuscire almeno a portare il sistema di scripting ad un livello funzionale, e a documentarlo (e magari anche la serializzazione).
+Fino a quel punto, navighiamo in mare aperto.
+Cheers!</p>
+</main>
+<footer>
+	<script src="https://giscus.app/client.js"
+			data-repo="seggiani-luca/seggiani-luca.github.io"
+			data-repo-id="R_kgDOP2TEAQ"
+			data-category="Announcements"
+			data-category-id="DIC_kwDOP2TEAc4DBWu5"
+			data-mapping="pathname"
+			data-strict="0"
+			data-reactions-enabled="0"
+			data-emit-metadata="0"
+			data-input-position="top"
+			data-theme="dark_dimmed"
+			data-lang="it"
+			crossorigin="anonymous"
+			async>
+	</script>
+	<p>Luca Seggiani - 2026</p>
+</footer>
+</body>

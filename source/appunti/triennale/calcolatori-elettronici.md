@@ -1,4 +1,10 @@
+<!-- Also try micro-sim! -->
+<!-- Il vaso di pandora. -->
+
 # Appunti di Calcolatori Elettronici
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sulle (ottime) [dispense](https://calcolatori.iet.unipi.it/) del professor Lettieri.
 Risultano utili anche i [testi](https://www.pisauniversitypress.it/scheda-ebook/graziano-frosini/architettura-dei-calcolatori-vol-i-9788867411405-222381.html) di Frosini, Lettieri sull'architettura dei calcolatori (ISBN 978-88-6741-080-4, 978-88-6741-081-1, 978-88-6741-082-8) pubblicati dalla [Pisa University Press](https://www.pisauniversitypress.it/).
 

@@ -1,4 +1,10 @@
+<!-- Derivate di derivate. -->
+<!-- Che cosa rappresenta Q? -->
+
 # Appunti di Fisica
+{{ page_blurb }}
+{{ estimate_time }}
+
 Gli appunti complementano i vari testi di Serway, Jewett (ISBN 978-1-133-94727-1).
 
 Sono disponibili:

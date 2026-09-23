@@ -1,4 +1,9 @@
+<!-- Divagazioni sulla mia tesi. -->
+<!-- Creare un computer nel computer. -->
+
 # 2026 07 24 Lauree Tesi e pensieri
+{{ page_blurb }}
+{{ estimate_time }}
 
 A quanto pare domani mi laureo, per cui è arrivata l'ora di condividere la mia [tesi](https://github.com/seggiani-luca/block-fat16-thesis).
 Il lavoro che ho fatto è stato più o meno anticipato da [questo post](/blog/2026-07-04-come-essere-pigro-mi-ha-insegnato-l-allocazione-di-memoria.html) sugli allocatori di memoria.

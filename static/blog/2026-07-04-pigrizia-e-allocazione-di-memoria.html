@@ -28,7 +28,16 @@
 </ul>
 </nav>
 <main>
-<h1>2026 07 04 Come essere pigro mi ha insegnato l'allocazione di memoria</h1>
+<!-- Arene e heap. -->
+<!-- Come abusare del linker. -->
+<h1>2026 07 04 Pigrizia e allocazione di memoria</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["Arene e heap.", "Come abusare del linker."];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>10 min</p>
 <p>Ho scritto la mia tesi di laurea triennale sull'estensione dispositivo <a href="https://en.wikipedia.org/wiki/Parallel_ATA">ATA</a> per l'emulatore <a href="/progetti/micro-sim.html">micro-sim</a>.
 Prima o poi metterò il link alla tesi qui da qualche parte, ma per la cosa di cui voglio parlare oggi non serve.</p>
 <h2>L'idea</h2>

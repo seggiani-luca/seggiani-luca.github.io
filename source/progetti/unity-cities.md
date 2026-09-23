@@ -1,6 +1,14 @@
-# Unity Cities
-Un sistema per la generazione di ambienti urbani procedurali usando [Unity](https://www.unity.com) come motore grafico. Questo progetto è stato perlopiù una scusa per approfondire ed implementare una versione dell'algoritmo [WFC (Wave Function Collapse)](https://github.com/mxgmn/WaveFunctionCollapse) per la popolazione di griglie di caselle modulari, basata su regole di adiacenza. La scelta della piattaforma da usare è caduta proprio su Unity in quanto fornisce diverse funzionalità avanzate (sopratutto per quanto riguarda la gestione delle gerarchie di oggetti, il sistema di prefab modulari e delle shader), restando abbastanza semplice e facile da estendere attraverso il sistema di scripting in [C#](https://dotnet.microsoft.com/en-us/languages/csharp). Si rende disponibile una [repository](https://github.com/seggiani-luca/city-unity) con asset e sorgente C#.
+<!-- WFC applicato al problema di decidere dove mettere le strade. -->
+<!-- Urbanistica fatta da algoritmi. -->
+<!-- Giocare a SimCity, ma con le adiacenze sui grafi. -->
+<!-- Il WFC è il sindaco, e Perlin l'assessore. -->
+<!-- Il problema più grande dell'algoritmo è il traffico. -->
 
+# Unity Cities
+{{ page_blurb }}
+{{ estimate_time }}
+
+Un sistema per la generazione di ambienti urbani procedurali usando [Unity](https://www.unity.com) come motore grafico. Questo progetto è stato perlopiù una scusa per approfondire ed implementare una versione dell'algoritmo [WFC (Wave Function Collapse)](https://github.com/mxgmn/WaveFunctionCollapse) per la popolazione di griglie di caselle modulari, basata su regole di adiacenza. La scelta della piattaforma da usare è caduta proprio su Unity in quanto fornisce diverse funzionalità avanzate (sopratutto per quanto riguarda la gestione delle gerarchie di oggetti, il sistema di prefab modulari e delle shader), restando abbastanza semplice e facile da estendere attraverso il sistema di scripting in [C#](https://dotnet.microsoft.com/en-us/languages/csharp). Si rende disponibile una [repository](https://github.com/seggiani-luca/city-unity) con asset e sorgente C#.
 
 ![sunset](/pics/unity-cities/sunset_19_30.png)
 

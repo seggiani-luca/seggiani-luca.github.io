@@ -1,4 +1,10 @@
+<!-- Un'idea sugli ECS. -->
+<!-- ECS ma in piccolo. -->
+<!-- Oggetti JavaScript applicati al 3D -->
+
 # 2026 07 04 Sull'allocazione degli oggetti
+{{ page_blurb }}
+{{ estimate_time }}
 
 Qualche giorno fa ho scritto qualcosa sul rendering [3D](/blog/2026-06-28-esperimenti-3d.html) e su [OpenGL](2026-06-30-fare-3d-con-opengl.html).
 Con l'idea di trasformare questo progetto in un motore per videogiochi vero e proprio, oggi voglio passare un po' di tempo a divagare sull'allocazione degli oggetti.

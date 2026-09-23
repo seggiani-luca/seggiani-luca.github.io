@@ -28,7 +28,19 @@
 </ul>
 </nav>
 <main>
+<!-- WFC applicato al problema di decidere dove mettere le strade. -->
+<!-- Urbanistica fatta da algoritmi. -->
+<!-- Giocare a SimCity, ma con le adiacenze sui grafi. -->
+<!-- Il WFC è il sindaco, e Perlin l'assessore. -->
+<!-- Il problema più grande dell'algoritmo è il traffico. -->
 <h1>Unity Cities</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["WFC applicato al problema di decidere dove mettere le strade.", "Urbanistica fatta da algoritmi.", "Giocare a SimCity, ma con le adiacenze sui grafi.", "Il WFC \u00e8 il sindaco, e Perlin l'assessore.", "Il problema pi\u00f9 grande dell'algoritmo \u00e8 il traffico."];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>9 min</p>
 <p>Un sistema per la generazione di ambienti urbani procedurali usando <a href="https://www.unity.com">Unity</a> come motore grafico. Questo progetto è stato perlopiù una scusa per approfondire ed implementare una versione dell'algoritmo <a href="https://github.com/mxgmn/WaveFunctionCollapse">WFC (Wave Function Collapse)</a> per la popolazione di griglie di caselle modulari, basata su regole di adiacenza. La scelta della piattaforma da usare è caduta proprio su Unity in quanto fornisce diverse funzionalità avanzate (sopratutto per quanto riguarda la gestione delle gerarchie di oggetti, il sistema di prefab modulari e delle shader), restando abbastanza semplice e facile da estendere attraverso il sistema di scripting in <a href="https://dotnet.microsoft.com/en-us/languages/csharp">C#</a>. Si rende disponibile una <a href="https://github.com/seggiani-luca/city-unity">repository</a> con asset e sorgente C#.</p>
 <p><img src="/pics/unity-cities/sunset_19_30.png" alt="sunset" /></p>
 <p>Autostrada alle 7:30 PM</p>

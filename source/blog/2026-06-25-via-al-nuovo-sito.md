@@ -1,4 +1,12 @@
+<!-- Come ho fatto tutto questo. -->
+<!-- La mia versione di Jekyll. -->
+<!-- Come complicare le pagine statiche. -->
+<!-- Web 1.5? -->
+
 # 2026 06 25 via al nuovo sito
+{{ page_blurb }}
+{{ estimate_time }}
+
 Test. Prova.
 Ho riscritto tutto il mio sito perché aggiornare la scorsa versione mi faceva venire il mal di testa.
 La [repository](https://github.com/seggiani-luca/seggiani-luca.github.io) con tutto il codice (incluso quello di questa pagina) è al solito posto.

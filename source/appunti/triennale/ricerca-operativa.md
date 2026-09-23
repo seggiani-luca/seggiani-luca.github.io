@@ -1,4 +1,11 @@
+<!-- Happiness is thinking linear. -->
+<!-- Happiness is thinking convex. -->
+<!-- Gomory coi piedi sulla scrivania. -->
+
 # Appunti di Ricerca Operativa
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sull'(ottimo) [testo](https://www.pisauniversitypress.it/scheda-libro/mauro-passacantando-massimo-pappalardo/ricerca-operativa-9788867410736-124167.html) del professor Pappalardo (ISBN 978-88-6741-073-6).
 
 Sono disponibili:

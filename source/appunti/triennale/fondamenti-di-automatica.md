@@ -1,4 +1,10 @@
+<!-- Ti aspetti i robot, trovi l'algebra lineare. --> 
+<!-- Controllo ottimo. -->
+
 # Appunti di Fondamenti di Automatica
+{{ page_blurb }}
+{{ estimate_time }}
+
 Il corso è basato sul [testo](https://www.mheducation.it/fondamenti-di-controlli-automatici-5-ed-9788838613166-italy) del professor Bolzern (ISBN 978-88-386-6882-1).
 
 Sono disponibili:

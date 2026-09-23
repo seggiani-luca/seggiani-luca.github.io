@@ -1,4 +1,13 @@
+<!-- Gomory coi piedi sulla scrivania. -->
+<!-- Perché studiare un algoritmo quando puoi implementarlo? -->
+<!-- MATLAB è un linguaggio illegittimo. -->
+<!-- Non usarli all'esame! -->
+<!-- Ironicamente poco ottimizzati. -->
+
 # Script Ricerca Operativa
+{{ page_blurb }}
+{{ estimate_time }}
+
 Script per la ricerca operativa scritti in MATLAB.
 
 Sono disponibili nella [repository](https://github.com/seggiani-luca/script-or).

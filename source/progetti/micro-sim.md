@@ -1,4 +1,14 @@
+<!-- Emulare i computer è più divertente di usarli. -->
+<!-- Un piccolo computer immaginario. -->
+<!-- Un computer costruito dentro un altro computer. -->
+<!-- Dai registri al filesystem. -->
+<!-- Prova a scriverci un giochino! -->
+<!-- Good enough for the thesis. -->
+
 # Micro Sim
+{{ page_blurb }}
+{{ estimate_time }}
+
 Un emulatore per un sistema basato su [RISC-V](https://github.com/seggiani-luca/micro-sim/blob/main/riscv.org).
 
 La **documentazione** è disponibile ai seguenti link:

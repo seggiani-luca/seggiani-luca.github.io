@@ -28,7 +28,18 @@
 </ul>
 </nav>
 <main>
+<!-- Fatto apposta per essere letto dagli umani. -->
+<!-- Niente heap e un thread solo. -->
+<!-- Un thread and constantly multiplexing! -->
+<!-- TCP e UDP sulla stessa porta? -->
 <h1>Kanban</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["Fatto apposta per essere letto dagli umani.", "Niente heap e un thread solo.", "Un thread and constantly multiplexing!", "TCP e UDP sulla stessa porta?"];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>< 1 min</p>
 <p>Server e client per un protocollo scritto in C, che realizza il metodo di gestione del lavoro basato su <strong>kanban</strong></p>
 <p>Sono disponibili i sorgenti del client e del server nella <a href="https://github.com/seggiani-luca/kanban">repository</a>.</p>
 <p>I principi che si sono voluti seguire in fase di sviluppo sono:</p>
