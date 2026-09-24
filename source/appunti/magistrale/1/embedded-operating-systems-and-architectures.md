@@ -1,4 +1,5 @@
-<!-- Work in progress. -->
+<!-- We slopped the docs. -->
+<!-- arm-none-eabi-gdb-add-index. -->
 
 # Embedded Operating Systems and Architectures notes 
 {{ page_blurb }}

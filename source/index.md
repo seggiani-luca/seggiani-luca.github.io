@@ -33,3 +33,12 @@ Ricordo che potrebbero esserci refusi, e questo materiale non intende in nessun 
 <p class=label>Politecnico di Torino (2026/20XX)</p>
 
 {{ create_list appunti/magistrale recurse=True blurb=True }}
+
+## Tesi
+
+Ho svolto la mia [tesi](https://raw.githubusercontent.com/seggiani-luca/block-fat16-thesis/b6f80b63e1758e44ab6abf1d0bf8378f3aa5c820/latex/main.pdf) di laurea triennale sull'emulazione di un dispositivo a blocchi per [questo](/progetti/micro-sim.html) progetto di emulazione di un calcolatore con un piccolo sistema operativo flat.
+Il relatore era il professor [Giuseppe Lettieri](https://calcolatori.iet.unipi.it/).
+
+## Altro
+
+C'anche una pagina per [altre](/altro.html) cose che mi interessano: perlopiù la musica, l'informatica, l'elettronica e le zone in cui queste discipline si sovrappongono.

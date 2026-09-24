@@ -5,7 +5,7 @@
 {{ page_blurb }}
 {{ estimate_time }}
 
-A quanto pare domani mi laureo, per cui è arrivata l'ora di condividere la mia [tesi](https://github.com/seggiani-luca/block-fat16-thesis).
+A quanto pare domani mi laureo, per cui è arrivata l'ora di condividere la mia [tesi](https://raw.githubusercontent.com/seggiani-luca/block-fat16-thesis/b6f80b63e1758e44ab6abf1d0bf8378f3aa5c820/latex/main.pdf).
 Il lavoro che ho fatto è stato più o meno anticipato da [questo post](/blog/2026-07-04-come-essere-pigro-mi-ha-insegnato-l-allocazione-di-memoria.html) sugli allocatori di memoria.
 Oggi, a lavoro svolto, finito, terminato, volevo prendermi un secondo per discutere ciò che ho fatto senza rompermi le scatole col linguaggio formale e le buone maniere.
 

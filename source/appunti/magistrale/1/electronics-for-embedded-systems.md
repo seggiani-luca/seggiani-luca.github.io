@@ -1,4 +1,5 @@
-<!-- Work in progress. -->
+<!-- Prove Millman's theorem. -->
+<!-- Don't let the magic smoke out! -->
 
 # Electronics for Embedded Systems notes 
 {{ page_blurb }}

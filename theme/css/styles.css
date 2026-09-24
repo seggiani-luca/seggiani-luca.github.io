@@ -133,9 +133,7 @@ h1, h2, h3 {
 	margin-top: 20px;
 	margin-bottom: 5px;
 	
-	background:
-		linear-gradient(90deg, var(--header-bg) 50%, rgba(0, 0, 0, 0) 100%),
-		radial-gradient(circle, var(--link) 1px, var(--header-bg) 1px);
+	background: var(--header-bg);
 	background-size: 
 		100% auto, 
 		10px 100%;
