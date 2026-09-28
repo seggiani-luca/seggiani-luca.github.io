@@ -1,5 +1,5 @@
 :root {
-    /* colors */
+	/* colors */
 	--page-bg:   #142038;
 	--header-bg: #15233d;
 	--table-bg:  #243a5f;
@@ -13,8 +13,8 @@
 	--fg:        #cddae7;
    
 	/* fonts */
-	--mono: monospace;
-    --sans: Helvetica, Arial, sans-serif;
+	--mono: "JetBrains Mono", monospace;
+	--sans: "Inter", Helvetica, Arial, sans-serif;
 }
 
 /* body */
@@ -28,7 +28,7 @@ body {
 	margin-left: auto;
 	margin-right: auto;
 	
-    color: var(--fg);
+	color: var(--fg);
 	
 	font-family: var(--sans);
 	
@@ -36,8 +36,8 @@ body {
 }
 
 @media (max-width: 600px) {
-    body {
-    	margin: 15px;
+	body {
+		margin: 15px;
 	}
 }
 
@@ -72,6 +72,32 @@ header h1 {
 
 header p {
 	margin-left: 0;
+}
+
+/* lynx */
+
+.links {
+	width: 100%;
+	display: flex;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.links a {
+	display: block;
+	width: 1.25rem;
+	height: 1.25rem;
+	opacity: 0.65;
+}
+
+.links a:hover {
+	opacity: 1;
+}
+
+.links img {
+	width: 100%;
+	height: 100%;
+	display: block;
 }
 
 /* nav */
@@ -137,7 +163,7 @@ h1, h2, h3 {
 	background-size: 
 		100% auto, 
 		10px 100%;
-    
+	
 	font-family: var(--sans);
 	text-transform: lowercase;
 	font-size: 18px;
@@ -229,7 +255,7 @@ li, p {
 }
 
 @media (max-width: 600px) {
-    .blurb {
+	.blurb {
 		display: block;
 		float: none;
 	}
@@ -259,13 +285,18 @@ footer {
 }
 
 @media (max-width: 600px) {
-    .badges a img {
+	.badges a img {
 		width: 44px;
 		height: 15px;
 	}
 }
 
 /* code */
+
+code {
+	font-family: var(--mono);
+	font-size: 90%;
+}
 
 .keyword {
 	color: pink;

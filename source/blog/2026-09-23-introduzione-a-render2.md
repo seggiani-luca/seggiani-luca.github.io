@@ -8,7 +8,7 @@
 {{ page_blurb }}
 {{ estimate_time }}
 
-Un po' di tempo fa ho scritto [questo](/blog/2026-06-28-sull-allocazione-degli-oggetti.html) articolo su un sistema per la gestione di oggetti polimorfi, simile ad un ECS, improntato allo sviluppo di motori grafici e/o per videogiochi.
+Un po' di tempo fa ho scritto [questo](/blog/2026-07-04-sull-allocazione-degli-oggetti.html) articolo su un sistema per la gestione di oggetti polimorfi, simile ad un ECS, improntato allo sviluppo di motori grafici e/o per videogiochi.
 Ho approfondito l'idea, sviluppato un po' di sistemi, e il risultato è disponibile a [questa](https://github.com/seggiani-luca/render2) repository.
 Ho scritto anche una [pagina](/progetti/render2.html) che dettaglia il progetto (ho copia-incollato il `README.md`, non aspettatevi molto).
 
