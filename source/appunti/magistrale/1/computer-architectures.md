@@ -5,4 +5,5 @@
 {{ estimate_time }}
 
 Available:
-- [Notes](https://seggiani-luca.github.io/ca-notes/master.pdf). 
+- [Notes](https://seggiani-luca.github.io/ca-notes/master.pdf);
+- [Exercises](https://github.com/seggiani-luca/ca-exercises).

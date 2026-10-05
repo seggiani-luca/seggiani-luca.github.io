@@ -6,4 +6,5 @@
 {{ estimate_time }}
 
 Available:
-- [Notes](https://seggiani-luca.github.io/eosa-notes/master.pdf). 
+- [Notes](https://seggiani-luca.github.io/eosa-notes/master.pdf);
+- [Exercises](https://github.com/seggiani-luca/eosa-exercises) (official and own OS implementations).
