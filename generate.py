@@ -93,7 +93,7 @@ def create_list(dr, number=0, recurse=False, blurb=False):
         # insert in list
         rel = "/" + str(fr.with_suffix(".html").relative_to(src))
         nam = create_title(fr.stem) 
-        res += f"<li><a href={rel}>{nam}</a>"
+        res += f"<li><a href=\"{rel}\">{nam}</a>"
 
         # optional blurb
         if blurb:

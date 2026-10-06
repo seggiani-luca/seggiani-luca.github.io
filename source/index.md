@@ -23,7 +23,7 @@ Gli ultimi 10 post dal [blog](blog.html) sono:
 
 ## Appunti
 
-Probabilmente sei qui per i miei [appunti](/appunti.html) (corsi di Ingegnera Informatica e affini).
+Probabilmente sei qui per i miei [appunti](/appunti.html) (corsi di Ingegneria Informatica e affini).
 Ricordo che potrebbero esserci refusi, e questo materiale non intende in nessun modo sostituirsi ai libri di testo o alle lezioni frontali.
 
 <p class=label>Università di Pisa (2023/2026)</p>
@@ -41,4 +41,4 @@ Il relatore era il professor [Giuseppe Lettieri](https://calcolatori.iet.unipi.i
 
 ## Altro
 
-C'anche una pagina per [altre](/altro.html) cose che mi interessano: perlopiù la musica, l'informatica, l'elettronica e le zone in cui queste discipline si sovrappongono.
+C'è anche una pagina per [altre](/altro.html) cose che mi interessano: perlopiù la musica, l'informatica, l'elettronica e le zone in cui queste discipline si sovrappongono.
