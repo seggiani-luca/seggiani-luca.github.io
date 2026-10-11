@@ -17,6 +17,8 @@ Ho raccolto alcuni dei miei [progetti](/progetti.html) più significativi, con a
 ## Blog
 
 Qualche volta scrivo di programmazione, tecnologia o altre cose che trovo interessanti.
+Questo è anche un tentativo di stabilire se un pensiero abbia una struttura interna coerente oppure mi sembri ragionevole soltanto perché non è ancora stato scritto.
+
 Gli ultimi 10 post dal [blog](blog.html) sono:
 
 {{ create_list blog number=10 blurb=True }}

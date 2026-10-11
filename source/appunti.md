@@ -4,6 +4,12 @@ Questa è una raccolta di appunti universitari, che ho steso mentre seguivo i co
 Potrebbero esserci errori o refusi.
 Per quanto abbia cercato di documentare il più accuratamente possibile quanto spiegato dai docenti, questo materiale non intende in nessun modo sostituirsi ai libri di testo o alle lezioni frontali.
 
+### Refusi
+
+Chiedo gentilmente a chi trova refusi in questi appunti di scrivermi opportuni insulti a [questo](mailto:seggianiluca2004@gmail.com) indirizzo di posta.
+Stavo pensando di stabilire un qualche tipo di taglia sugli errori trovati, tipo 50 centesimi ad errore, ma mi sono reso conto che non ho una lira e non manterrei mai la mia parola.
+Facciamo che a 10 errori ti offro una birra.
+
 ## Triennale in Ingegneria Informatica
 Appunti presi durante il corso di laurea triennale in Ingegneria Informatica all'Università di Pisa (2023/2026).
 

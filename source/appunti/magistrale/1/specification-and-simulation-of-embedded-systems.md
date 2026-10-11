@@ -1,4 +1,5 @@
 <!-- Formal verification. -->
+<!-- Waiting for Vivado to start... -->
 
 # Specification and Simulation of Embedded Systems notes 
 {{ page_blurb }}
