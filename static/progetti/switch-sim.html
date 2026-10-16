@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Luca Seggiani</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- gfonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+
+<!-- prism -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>Prism.plugins.autoloader.languages_path ="https://cdn.jsdelivr.net/npm/prismjs/components/";</script>
+</head>
+<body>
+<header>
+	<a href="/">
+		<h1>Luca Seggiani</h1>
+		<p>appunti - codice - musica</p>
+	</a>
+	<nav class="links" aria-label="Links">
+		<a href="https://github.com/seggiani-luca" aria-label="GitHub">
+			<img src="https://cdn.simpleicons.org/github/ffffff" alt="">
+		</a>
+		<a href="https://xeno7.bandcamp.com/" aria-label="Bandcamp">
+			<img src="https://cdn.simpleicons.org/bandcamp/ffffff" alt="">
+		</a>
+		<a href="https://www.youtube.com/@darkside6973" aria-label="YouTube">
+			<img src="https://cdn.simpleicons.org/youtube/ffffff" alt="">
+		</a>
+		<a href="https://soundcloud.com/xenoxxeno" aria-label="SoundCloud">
+			<img src="https://cdn.simpleicons.org/soundcloud/ffffff" alt="">
+		</a>
+		<a href="mailto:seggianiluca2004@gmail.com" aria-label="SoundCloud">
+			<img src="https://api.iconify.design/lucide:mail.svg?color=%23fff" alt="">
+		</a>
+	</nav>
+</header>
+<nav>
+<ul>
+<li><a href="/altro.html">altro</a></li>
+<li><a href="/appunti.html">appunti</a></li>
+<li><a href="/blog.html">blog</a></li>
+<li><a href="/progetti.html">progetti</a></li>
+</ul>
+</nav>
+<main>
+<!-- Between Logisim and LTSPice --> 
+<h1>switch-sim</h1>
+<p>An interactive switch-level digital circuit simulator running entirely in the browser.
+Powered by a C simulator compiled to <a href="https://webassembly.org/">WASM</a> and an interactive schematic editor.</p>
+<p>Conventional simulators either:</p>
+<ul>
+<li>Model logic gates as abstract boolean functions, focusing on the digital logic side of things;</li>
+<li>Model transistors in a physically accurate way, solving differential equations which become way too clunky for big circuits.
+<strong>switch-sim</strong> sits in-between, modeling digital circuits at the transistor level using CMOS switches (NMOS and PMOS MOSFETs), signal strength degradation, high-impedance states, and bus contention.</li>
+</ul>
+<h2>Features</h2>
+<ul>
+<li><strong>Transistor-level simulation</strong>: logic gates and sequential circuits are built directly from CMOS or passgate primitives: PMOS and NMOS transistors, pull-up/pull-down resistors, power supplies, and grounds;</li>
+<li><strong>6-valued logic</strong>: resolvee signal logic and drive strength with <strong>High</strong>, <strong>Low</strong>, <strong>Weak High</strong>, <strong>Weak Low</strong>, <strong>Floating</strong> and <strong>Unknown</strong> values;</li>
+<li><strong>Hierarchical subcircuits</strong>: any circuit with named I/O ports can be packaged into a recursive <strong>IC</strong> (<em>Integrated Circuit</em>) block, with an observable internal state;</li>
+<li><strong>Interactive schematic editor</strong>: allows for SVG circuit drawing and rendering, and interactive pin switching;</li>
+<li><strong>Serialization format</strong>: exports and imports circuits as clean, human-readable JSON files.</li>
+</ul>
+<p>An included library includes pre-built CMOS gates (<code>NOT</code>, <code>NAND</code>, <code>NOR</code>, ...) ready to place.</p>
+<h2>Signal States &amp; Color Coding</h2>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Logic Level</th>
+<th>Drive Strength</th>
+<th>Wire Color</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NODE_HIGH</code></td>
+<td>High ($1$)</td>
+<td>Full</td>
+<td>🟢 Green (<code>#2ecc71</code>)</td>
+<td>Direct connection to voltage source ($V_{DD}$)</td>
+</tr>
+<tr>
+<td><code>NODE_HIGH_WEAK</code></td>
+<td>High ($1$)</td>
+<td>Weak</td>
+<td>🟢 Dark Green (<code>#0e7c41</code>)</td>
+<td>Pulled high via resistor or passed through NMOS</td>
+</tr>
+<tr>
+<td><code>NODE_LOW</code></td>
+<td>Low ($0$)</td>
+<td>Full</td>
+<td>🔴 Red (<code>#e74c3c</code>)</td>
+<td>Direct connection to Ground ($GND$)</td>
+</tr>
+<tr>
+<td><code>NODE_LOW_WEAK</code></td>
+<td>Low ($0$)</td>
+<td>Weak</td>
+<td>🔴 Dark Red (<code>#972c0c</code>)</td>
+<td>Pulled low via resistor or passed through PMOS</td>
+</tr>
+<tr>
+<td><code>NODE_FLOATING</code></td>
+<td>Hi-Z</td>
+<td>None</td>
+<td>🟡 Yellow (<code>#f1c40f</code>)</td>
+<td>Disconnected / high-impedance net</td>
+</tr>
+<tr>
+<td><code>NODE_UNKNOWN</code></td>
+<td>Unknown</td>
+<td>Contention</td>
+<td>⚪ Gray (<code>#cccccc</code>)</td>
+<td>Signal contention or undetermined logic level</td>
+</tr>
+</tbody>
+</table>
+<h2>Controls &amp; Keyboard Shortcuts</h2>
+<h3>Editor Tools</h3>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><kbd>w</kbd></td>
+<td><strong>Wire</strong></td>
+<td>Draw interconnecting wires. Click once to begin, click again to end. Automatically splits intersected wires.</td>
+</tr>
+<tr>
+<td><kbd>m</kbd></td>
+<td><strong>Move</strong></td>
+<td>Click and drag any component, wire, port, or subcircuit on the canvas.</td>
+</tr>
+<tr>
+<td><kbd>d</kbd></td>
+<td><strong>Delete</strong></td>
+<td>Click on any element (component, wire segment, port, or subcircuit) to remove it.</td>
+</tr>
+<tr>
+<td><kbd>Shift</kbd> + <kbd>p</kbd></td>
+<td><strong>Port</strong></td>
+<td>Opens a modal to place a named <code>Input</code> or <code>Output</code> port.</td>
+</tr>
+<tr>
+<td><kbd>f</kbd></td>
+<td><strong>Fiddle</strong></td>
+<td><strong>Interactive mode</strong>: Click an input port to toggle its state ($0 \leftrightarrow 1$). Click a subcircuit IC to enter and inspect its internal schematic.</td>
+</tr>
+<tr>
+<td><kbd>s</kbd></td>
+<td><strong>Subcircuit</strong></td>
+<td>Import any saved <code>.json</code> circuit file and place it on the canvas as an IC block.</td>
+</tr>
+<tr>
+<td><kbd>Esc</kbd></td>
+<td><strong>Cancel / Back</strong></td>
+<td>Cancels the active dragging/drawing action, or navigates up one level in the subcircuit hierarchy.</td>
+</tr>
+</tbody>
+</table>
+<h3>Circuit Components</h3>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><kbd>p</kbd></td>
+<td><strong>PMOS</strong></td>
+<td>p-channel MOSFET. Conducts when gate is <code>LOW</code>. Source: $(+1, +1)$, Gate: $(-1, 0)$, Drain: $(+1, -1)$.</td>
+</tr>
+<tr>
+<td><kbd>n</kbd></td>
+<td><strong>NMOS</strong></td>
+<td>n-channel MOSFET. Conducts when gate is <code>HIGH</code>. Source: $(+1, -1)$, Gate: $(-1, 0)$, Drain: $(+1, +1)$.</td>
+</tr>
+<tr>
+<td><kbd>v</kbd></td>
+<td><strong>Source</strong></td>
+<td>5V constant voltage supply ($V_{DD}$ / Logic 1).</td>
+</tr>
+<tr>
+<td><kbd>g</kbd></td>
+<td><strong>Ground</strong></td>
+<td>Ground chassis terminal (0V / Logic 0).</td>
+</tr>
+<tr>
+<td><kbd>r</kbd></td>
+<td><strong>Resistor</strong></td>
+<td>Automatically detected as a pull-up or pull-down resistor based on its net connectivity.</td>
+</tr>
+</tbody>
+</table>
+<h2>Architecture</h2>
+<p>The project is split into two primary layers:</p>
+<pre><code>switch-sim/
+├── src/                      # C Simulation Engine
+│   ├── export.h              # Emscripten export declarations
+│   ├── netlist/              # In-memory netlist data structures
+│   │   ├── netlist.h
+│   │   └── netlist.c
+│   └── simulation/           # Switch-level relaxation solver
+│       ├── simulation.h
+│       └── simulation.c
+├── static/                   # Web Application
+│   ├── index.html            # Main UI shell
+│   ├── favicon.svg
+│   ├── css/
+│   │   └── styles.css        # UI styling &amp; color definitions
+│   ├── js/
+│   │   ├── app.js            # App lifecycle and event wiring
+│   │   ├── model/
+│   │   │   └── circuit.js    # Canvas circuit model and geometry
+│   │   ├── interface/
+│   │   │   ├── editor.js     # Editing tools and event dispatch
+│   │   │   └── renderer.js   # SVG drawing and icon rendering
+│   │   └── simulation/
+│   │       ├── simulator.js  # WASM wrapper and C API bindings
+│   │       └── netlist.js    # Net connectivity extraction &amp; netlist compiler
+│   ├── lib/                  # Predefined IC library
+│   │   ├── not.json
+│   │   ├── nand.json
+│   │   ├── nor.json
+│   │   ├── index.py          # Catalog index generator
+│   │   └── index.json
+│   └── wasm/                 # Compiled WebAssembly binary &amp; JS glue
+│       ├── simulatorWasm.wasm
+│       └── simulatorWasm.js
+├── Makefile                  # Build orchestration
+└── eslint.config.js          # Linter configuration
+</code></pre>
+<h3>How the Simulation Works</h3>
+<ol>
+<li><strong>Net extraction</strong>: when a schematic changes, <code>netlist.js</code> performs a flood-fill traversal across connected wire coordinates to cluster wire segments into discrete electrical nets;</li>
+<li><strong>WASM compilation</strong>: the frontend instantiates a C <code>Circuit</code> in WASM memory via <code>simulator.js</code>, mapping all schematic elements (MOS transistors, resistors, supply rails, and subcircuit port couplings) to C nodes and component descriptors;</li>
+<li><strong>Switch-level relaxation algorithm</strong>: this happens in steps.
+<ul>
+<li>Fixed power rails (<code>COMPONENT_SOURCE</code> and <code>COMPONENT_GROUND</code>) are driven to their nodes;</li>
+<li>MOS transistor gate voltages are evaluated to set channel states (<code>MOS_ON</code>, <code>MOS_OFF</code>, or <code>MOS_UNKNOWN</code>);</li>
+<li>Channels and dipoles propagate signals bidirectionally between source and drain according to transistor conduction and strength rules;</li>
+<li>Strong drivers override weak drivers; conflicting drivers of identical strength resolve to <code>NODE_UNKNOWN</code>;</li>
+<li>The loop iterates until the network reaches a steady state (relaxation convergence) or hits <code>MAX_SIM_ITERS</code> (1000).</li>
+</ul>
+</li>
+<li><strong>State writeback</strong>: node voltages are queried across the WASM boundary and mapped back onto the schematic wires, updating line colors and port LEDs in SVG.</li>
+</ol>
+<h2>Getting Started</h2>
+<h3>Prerequisites</h3>
+<ul>
+<li><a href="https://emscripten.org/">Emscripten SDK</a> (<code>emcc</code>) — required to compile C source code to WebAssembly;</li>
+<li><a href="https://www.python.org/">Python 3</a> — required for running the local HTTP server and building the library index;</li>
+<li>A <em>browser</em> (duh?).</li>
+</ul>
+<h3>Building &amp; Running</h3>
+<ol>
+<li>
+<p><strong>Clone the repository</strong>:</p>
+<pre><code class="language-bash">git clone https://github.com/your-username/switch-sim.git
+cd switch-sim
+</code></pre>
+</li>
+<li>
+<p><strong>Compile WebAssembly &amp; Build component library</strong>:</p>
+<pre><code class="language-bash">make
+</code></pre>
+<p>This invokes <code>emcc</code> to produce <code>static/wasm/simulatorWasm.wasm</code> and <code>static/wasm/simulatorWasm.js</code>, and runs <code>index.py</code> to index the standard gate library.</p>
+</li>
+<li>
+<p><strong>Start the server</strong>:</p>
+<pre><code class="language-bash">make serve
+</code></pre>
+<p>This starts a local Python HTTP server serving the <code>static/</code> directory.</p>
+</li>
+<li>
+<p><strong>Open in browser</strong>:
+navigate to <a href="http://localhost:8000">http://localhost:8000</a> in any modern browser supporting WASM and ES Modules.</p>
+</li>
+</ol>
+<h2>Additional Make Targets</h2>
+<ul>
+<li><code>make wasm</code>: Recompiles only the C source files into WebAssembly;</li>
+<li><code>make index</code>: Regenerates <code>static/lib/index.json</code> from JSON files in <code>static/lib/</code>;</li>
+<li><code>make clean</code>: Deletes the generated <code>static/wasm/</code> directory;</li>
+<li><code>make format</code>: Formats JS, HTML, and CSS files using <code>prettier</code>, and C/H files using <code>clang-format</code>.</li>
+</ul>
+<h2>Circuit File Format</h2>
+<p>Circuits are saved as plain JSON objects.
+Below is the structure:</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;NOT&quot;,
+  &quot;description&quot;: &quot;CMOS inverting gate&quot;,
+  &quot;components&quot;: [
+    { &quot;type&quot;: &quot;pmos&quot;, &quot;x&quot;: 15, &quot;y&quot;: 9 },
+    { &quot;type&quot;: &quot;nmos&quot;, &quot;x&quot;: 15, &quot;y&quot;: 15 },
+    { &quot;type&quot;: &quot;ground&quot;, &quot;x&quot;: 16, &quot;y&quot;: 18 },
+    { &quot;type&quot;: &quot;source&quot;, &quot;x&quot;: 16, &quot;y&quot;: 6 }
+  ],
+  &quot;wires&quot;: [
+    { &quot;x1&quot;: 10, &quot;y1&quot;: 12, &quot;x2&quot;: 12, &quot;y2&quot;: 12 }
+  ],
+  &quot;ports&quot;: [
+    { &quot;name&quot;: &quot;IN&quot;, &quot;direction&quot;: &quot;input&quot;, &quot;x&quot;: 8, &quot;y&quot;: 12 },
+    { &quot;name&quot;: &quot;OUT&quot;, &quot;direction&quot;: &quot;output&quot;, &quot;x&quot;: 20, &quot;y&quot;: 12 }
+  ],
+  &quot;subcircuits&quot;: []
+}
+</code></pre>
+<p>Any circuit containing input and output ports can be imported into another circuit as an IC block via the <strong>Subcircuit</strong> tool or placed directly from the sidebar library.</p>
+</main>
+<footer>
+	<script src="https://giscus.app/client.js"
+			data-repo="seggiani-luca/seggiani-luca.github.io"
+			data-repo-id="R_kgDOP2TEAQ"
+			data-category="Announcements"
+			data-category-id="DIC_kwDOP2TEAc4DBWu5"
+			data-mapping="pathname"
+			data-strict="0"
+			data-reactions-enabled="0"
+			data-emit-metadata="0"
+			data-input-position="top"
+			data-theme="dark_dimmed"
+			data-lang="it"
+			crossorigin="anonymous"
+			async>
+	</script>
+	<p>Luca Seggiani - 2026</p>
+</footer>
+</body>
