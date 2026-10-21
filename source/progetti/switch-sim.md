@@ -1,6 +1,8 @@
 <!-- Between Logisim and LTSPice --> 
 
 # switch-sim
+{{ page_blurb }}
+{{ estimate_time }}
 
 An interactive switch-level digital circuit simulator running entirely in the browser.
 You can access it [here](https://seggiani-luca.github.io/switch-sim/).
@@ -11,6 +13,7 @@ Powered by a C simulator compiled to [WASM](https://webassembly.org/) and an int
 Conventional simulators either:
 - Model logic gates as abstract boolean functions, focusing on the digital logic side of things;
 - Model transistors in a physically accurate way, solving differential equations which become way too clunky for big circuits.
+
  **switch-sim** sits in-between, modeling digital circuits at the transistor level using CMOS switches (NMOS and PMOS MOSFETs), signal strength degradation, high-impedance states, and bus contention.
 
 ## Features

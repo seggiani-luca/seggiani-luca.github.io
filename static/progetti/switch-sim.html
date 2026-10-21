@@ -52,6 +52,13 @@
 <main>
 <!-- Between Logisim and LTSPice --> 
 <h1>switch-sim</h1>
+<p class=subtitle><script>
+(() => {
+    const blurbs = ["Between Logisim and LTSPice"];
+    document.write(blurbs[Math.floor(Math.random() * blurbs.length)]);
+})();
+</script></p>
+<p class=estimate>4 min</p>
 <p>An interactive switch-level digital circuit simulator running entirely in the browser.
 You can access it <a href="https://seggiani-luca.github.io/switch-sim/">here</a>.
 Powered by a C simulator compiled to <a href="https://webassembly.org/">WASM</a> and an interactive schematic editor.</p>
@@ -59,9 +66,9 @@ Powered by a C simulator compiled to <a href="https://webassembly.org/">WASM</a>
 <p>Conventional simulators either:</p>
 <ul>
 <li>Model logic gates as abstract boolean functions, focusing on the digital logic side of things;</li>
-<li>Model transistors in a physically accurate way, solving differential equations which become way too clunky for big circuits.
-<strong>switch-sim</strong> sits in-between, modeling digital circuits at the transistor level using CMOS switches (NMOS and PMOS MOSFETs), signal strength degradation, high-impedance states, and bus contention.</li>
+<li>Model transistors in a physically accurate way, solving differential equations which become way too clunky for big circuits.</li>
 </ul>
+<p><strong>switch-sim</strong> sits in-between, modeling digital circuits at the transistor level using CMOS switches (NMOS and PMOS MOSFETs), signal strength degradation, high-impedance states, and bus contention.</p>
 <h2>Features</h2>
 <ul>
 <li><strong>Transistor-level simulation</strong>: logic gates and sequential circuits are built directly from CMOS or passgate primitives: PMOS and NMOS transistors, pull-up/pull-down resistors, power supplies, and grounds;</li>
